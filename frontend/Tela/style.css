@@ -18,25 +18,24 @@ body {
   background: #2aa3a3;
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 16px 36px;
-  min-height: 90px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  gap: 20px;
+  padding: 12px 20px; /* ↓ menos espaço lateral */
+  min-height: 80px;   /* ↓ ajusta altura */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.logo img {
+  height: 78px; /* ↑ logo maior */
+  width: auto;
+  display: block;
 }
 
 .topbar h1 {
   flex: 1;
-  margin: 0;
   font-size: 22px;
   font-weight: 600;
   color: white;
-  letter-spacing: 0.2px;
-}
-
-.logo img {
-  height: 56px;
-  width: auto;
-  display: block;
+  letter-spacing: 0.3px;
 }
 
 .menu,
