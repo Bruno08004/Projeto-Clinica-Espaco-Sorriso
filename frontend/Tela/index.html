@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Espaço Sorriso</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <img src="../assests/logo.png" alt="Espaço Sorriso">
+  </div>
+
+  <h1>Espaço Sorriso - Sistema de Gestão</h1>
+
+  <nav class="menu">
+    <a href="#">Início</a>
+    <a href="#">Relatórios</a>
+    <a href="#">Configurações</a>
+    <a href="#">Sair</a>
+  </nav>
+
+  <div class="profile">👤</div>
+</header>
+
+<main class="container">
+
+  <div class="search-box">
+    <input type="text" placeholder="Buscar...">
+  </div>
+
+  <section class="services">
+
+    <div class="card" onclick="navigate('pacientes')">
+      <span>👤</span>
+      <div>
+        <h3>Gerenciamento de Pacientes</h3>
+        <p>Cadastre, edite e consulte informações básicas dos pacientes.</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="navigate('atendimentos')">
+      <span>📅</span>
+      <div>
+        <h3>Gerenciamento de Atendimentos</h3>
+        <p>Registre consultas e procedimentos.</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="navigate('pagamentos')">
+      <span>💳</span>
+      <div>
+        <h3>Gerenciamento de Pagamentos</h3>
+        <p>Registre e acompanhe pagamentos.</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="navigate('comissao')">
+      <span>💰</span>
+      <div>
+        <h3>Gerenciamento de Comissão</h3>
+        <p>Controle e calcule automaticamente as comissões.</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="navigate('procedimentos')">
+      <span>🦷</span>
+      <div>
+        <h3>Gerenciamento de Procedimentos</h3>
+        <p>Cadastre e classifique procedimentos odontológicos.</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="navigate('dentistas')">
+      <span>🪪</span>
+      <div>
+        <h3>Gerenciamento de Dentistas</h3>
+        <p>Cadastre dentistas e gere relatórios.</p>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer class="footer">
+  <button onclick="logout()">SAIR</button>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
