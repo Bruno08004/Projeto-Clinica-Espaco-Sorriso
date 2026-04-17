@@ -67,7 +67,43 @@ app.get('/dentistas', (req, res) => {
     });
 });
 
+// 3. Rota para ATUALIZAR um dentista (UPDATE)
+app.put('/dentistas/:cpf', (req, res) => {
+    // 1. Pega o CPF que vem na URL (ex: /dentistas/11122233344)
+    const { cpf } = req.params; 
+    
+    // 2. Pega os novos dados que vieram no corpo da requisição (JSON)
+    const { nome, CRO, croUF, especialidade } = req.body;
+
+    // 3. Monta o comando SQL de atualização
+    // ATENÇÃO: Geralmente não atualizamos a Chave Primária (CPF), só os outros dados.
+    const query = 'UPDATE dentista SET nome = ?, CRO = ?, croUF = ?, especialidade = ? WHERE CPF_Dentista = ?';
+    const valores = [nome, CRO, croUF, especialidade, cpf];
+
+    db.query(query, valores, (err, result) => {
+        if (err) {
+            console.error('Erro ao atualizar dentista:', err);
+            // Se tentar colocar um CRO que já pertence a outro dentista:
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ erro: 'O novo CRO informado já está cadastrado no sistema.' });
+            }
+            return res.status(500).json({ erro: 'Erro interno ao atualizar no banco de dados' });
+        }
+
+        // Se o banco rodou o comando, mas nenhuma linha foi alterada, significa que o CPF não existe lá
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ erro: 'Dentista não encontrado com o CPF informado.' });
+        }
+
+        res.status(200).json({ mensagem: 'Dados do dentista atualizados com sucesso!' });
+    });
+});
+
 // ==========================================
 // INICIANDO O SERVIDOR
 // ==========================================
 const PORTA = process.env.PORTA || 3000;
+
+app.listen(PORTA, () => {
+    console.log(`Servidor rodando na porta ${PORTA}`);
+});
