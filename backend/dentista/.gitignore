@@ -1,0 +1,5 @@
+# Ignorar arquivos de ambiente com senhas
+.env
+
+# Ignorar a pasta de dependências do Node (ela é muito pesada e o Github não precisa dela)
+node_modules/
