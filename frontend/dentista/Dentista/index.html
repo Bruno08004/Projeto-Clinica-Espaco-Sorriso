@@ -84,16 +84,17 @@
         <button>Editar Dentista</button>
       </div>
 
-      <form>
-        <input placeholder="Nome*">
-        <input placeholder="CRO*">
-        <input placeholder="Especialidade*">
-        <input placeholder="CPF">
+      <form id="form-dentista">
+        <input id="nome" placeholder="Nome*">
+        <input id="cro" placeholder="CRO*">
+        <input id="uf" placeholder="UF do CRO (ex: BA, SP)*">
+        <input id="especialidade" placeholder="Especialidade*">
+        <input id="cpf" placeholder="CPF">
         <input placeholder="Telefone*">
         <input placeholder="Endereço">
         <input placeholder="Data de Nascimento">
 
-        <button class="save">Salvar</button>
+        <button type="submit" class="save">Salvar</button>
       </form>
 
     </div>
@@ -106,5 +107,80 @@
   <span>SAIR</span>
 </footer>
 
+<script>
+  const formDentista = document.getElementById('form-dentista');
+  const tbody = document.querySelector('table tbody'); // Pega a parte onde ficam as linhas da tabela
+
+  // 1. Função que BUSCA e DESENHA a tabela (GET)
+  async function carregarDentistas() {
+    try {
+      const resposta = await fetch('http://localhost:3000/dentistas');
+      const dentistas = await resposta.json();
+
+      // Limpa a tabela estática (apaga o Dr. Ricardo Almeida)
+      tbody.innerHTML = '';
+
+      // Roda um laço de repetição criando uma linha <tr> para cada dentista do banco
+      dentistas.forEach(dentista => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${dentista.nome}</td>
+          <td>${dentista.CRO} - ${dentista.croUF}</td>
+          <td>${dentista.especialidade}</td>
+          <td>${dentista.CPF_Dentista}</td>
+          <td>Não cadastrado</td>
+          <td>Não cadastrado</td>
+          <td>
+            <button class="edit">Editar</button>
+            <button class="delete">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (erro) {
+      console.error('Erro ao carregar tabela:', erro);
+    }
+  }
+
+  // Chama a função assim que a página termina de carregar
+  carregarDentistas();
+
+  // 2. Função que SALVA o dentista (POST)
+  formDentista.addEventListener('submit', async (evento) => {
+    evento.preventDefault(); 
+
+    const dados = {
+      nome: document.getElementById('nome').value,
+      CRO: document.getElementById('cro').value,
+      croUF: document.getElementById('uf').value,
+      especialidade: document.getElementById('especialidade').value,
+      CPF_Dentista: document.getElementById('cpf').value
+    };
+
+    try {
+      const resposta = await fetch('http://localhost:3000/dentistas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dados) 
+      });
+
+      const resultado = await resposta.json();
+
+      if (resposta.ok) {
+        alert('Sucesso: ' + resultado.mensagem);
+        formDentista.reset(); 
+        
+        carregarDentistas(); 
+      } else {
+        alert('Aviso do Servidor: ' + resultado.erro);
+      }
+    } catch (erro) {
+      console.error(erro);
+      alert('Erro crítico: O backend não respondeu.');
+    }
+  });
+</script>
 </body>
 </html>
