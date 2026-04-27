@@ -67,6 +67,28 @@ app.get('/dentistas', (req, res) => {
     });
 });
 
+// 2.1. Rota para BUSCAR um dentista específico por CPF (READ ONE)
+app.get('/dentistas/:cpf', (req, res) => {
+    const { cpf } = req.params; // Pega o CPF que o usuário digitou na URL
+
+    const query = 'SELECT * FROM dentista WHERE CPF_Dentista = ?';
+
+    db.query(query, [cpf], (err, results) => {
+        if (err) {
+            console.error('Erro ao buscar dentista:', err);
+            return res.status(500).json({ erro: 'Erro interno ao consultar o banco de dados' });
+        }
+
+        // Se o banco não encontrar nada, o array 'results' vem vazio (tamanho 0)
+        if (results.length === 0) {
+            return res.status(404).json({ erro: 'Dentista não encontrado com o CPF informado.' });
+        }
+
+        // Como o CPF é único, retornamos apenas o primeiro item do array (posição 0)
+        res.status(200).json(results[0]);
+    });
+});
+
 // 3. Rota para ATUALIZAR um dentista (UPDATE)
 app.put('/dentistas/:cpf', (req, res) => {
     // 1. Pega o CPF que vem na URL (ex: /dentistas/11122233344)
@@ -96,6 +118,35 @@ app.put('/dentistas/:cpf', (req, res) => {
         }
 
         res.status(200).json({ mensagem: 'Dados do dentista atualizados com sucesso!' });
+    });
+});
+
+// 4. Rota para EXCLUIR um dentista (DELETE)
+app.delete('/dentistas/:cpf', (req, res) => {
+    const { cpf } = req.params; // Pega o CPF da URL
+
+    const query = 'DELETE FROM dentista WHERE CPF_Dentista = ?';
+
+    db.query(query, [cpf], (err, result) => {
+        if (err) {
+            console.error('Erro ao excluir dentista:', err);
+            
+            // Tratamento de erro de Chave Estrangeira
+            if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+                return res.status(400).json({ 
+                    erro: 'Não é possível excluir este dentista, pois ele já possui atendimentos ou procedimentos vinculados no sistema.' 
+                });
+            }
+            
+            return res.status(500).json({ erro: 'Erro interno ao excluir no banco de dados' });
+        }
+
+        // Se o banco rodou o comando, mas nenhuma linha foi apagada, o CPF não existia
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ erro: 'Dentista não encontrado com o CPF informado.' });
+        }
+
+        res.status(200).json({ mensagem: 'Dentista excluído com sucesso!' });
     });
 });
 
