@@ -15,10 +15,10 @@
   <h1>Espaço Sorriso - Sistema de Gestão</h1>
 
   <nav>
-    <a href="#">Início</a>
+    <a href="javascript:irParaInicio()">Início</a>
     <a href="#">Relatórios</a>
     <a href="#">Configurações</a>
-    <a href="#">Sair</a>
+    <a href="javascript:sair()">Sair</a>
   </nav>
 
   <div class="profile">👤</div>
@@ -35,16 +35,14 @@
 
   <!-- BUSCA -->
   <div class="search-bar">
-    <input type="text" placeholder="Buscar por nome do dentista, CRO ou telefone...">
-    <button>Pesquisar</button>
+    <input id="busca-input" type="text" placeholder="Buscar por nome do dentista, CRO ou telefone...">
+    <button id="busca-btn">Pesquisar</button>
   </div>
 
   <div class="content">
 
     <!-- TABELA -->
     <div class="table-box">
-
-      <button class="btn-new">Novo Dentista</button>
 
       <table>
         <thead>
@@ -108,19 +106,30 @@
 </footer>
 
 <script>
+  // Funções de navegação
+  function irParaInicio() {
+    window.location.href = '../../Tela/index.html';
+  }
+
+  function sair() {
+    if (confirm('Tem certeza que deseja sair? Qualquer dados não salvos serão perdidos.')) {
+      alert('Até logo!');
+      window.location.href = '../../Tela/index.html';
+    }
+  }
+
   const formDentista = document.getElementById('form-dentista');
-  const tbody = document.querySelector('table tbody'); // Pega a parte onde ficam as linhas da tabela
+  const tbody = document.querySelector('table tbody');
+  let cpfEmEdicao = null; // Armazena o CPF em edição
 
   // 1. Função que BUSCA e DESENHA a tabela (GET)
   async function carregarDentistas() {
     try {
-      const resposta = await fetch('http://localhost:3000/dentistas');
+      const resposta = await fetch('http://localhost:3001/dentistas');
       const dentistas = await resposta.json();
 
-      // Limpa a tabela estática (apaga o Dr. Ricardo Almeida)
       tbody.innerHTML = '';
 
-      // Roda um laço de repetição criando uma linha <tr> para cada dentista do banco
       dentistas.forEach(dentista => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -131,23 +140,75 @@
           <td>Não cadastrado</td>
           <td>Não cadastrado</td>
           <td>
-            <button class="edit">Editar</button>
-            <button class="delete">Excluir</button>
+            <button class="edit" data-cpf="${dentista.CPF_Dentista}">Editar</button>
+            <button class="delete" data-cpf="${dentista.CPF_Dentista}">Excluir</button>
           </td>
         `;
         tbody.appendChild(tr);
+
+        // Adiciona eventos aos botões Editar e Excluir
+        tr.querySelector('.edit').addEventListener('click', () => editarDentista(dentista));
+        tr.querySelector('.delete').addEventListener('click', () => excluirDentista(dentista.CPF_Dentista));
       });
     } catch (erro) {
       console.error('Erro ao carregar tabela:', erro);
+      alert('Erro ao carregar dentistas');
     }
   }
 
   // Chama a função assim que a página termina de carregar
   carregarDentistas();
 
-  // 2. Função que SALVA o dentista (POST)
+  // 2. Função para EDITAR dentista
+  function editarDentista(dentista) {
+    document.getElementById('nome').value = dentista.nome;
+    document.getElementById('cro').value = dentista.CRO;
+    document.getElementById('uf').value = dentista.croUF;
+    document.getElementById('especialidade').value = dentista.especialidade;
+    document.getElementById('cpf').value = dentista.CPF_Dentista;
+    
+    cpfEmEdicao = dentista.CPF_Dentista;
+    
+    // Muda o botão e título
+    document.querySelector('.save').textContent = 'Atualizar';
+    document.querySelectorAll('.tabs button')[1].classList.add('active');
+    document.querySelectorAll('.tabs button')[0].classList.remove('active');
+    
+    // Scroll para o formulário
+    document.querySelector('.form-box').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // 3. Função para EXCLUIR dentista
+  async function excluirDentista(cpf) {
+    if (!confirm('Tem certeza que deseja excluir este dentista?')) {
+      return;
+    }
+
+    try {
+      const resposta = await fetch(`http://localhost:3001/dentistas/${cpf}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const resultado = await resposta.json();
+
+      if (resposta.ok) {
+        alert('Sucesso: ' + resultado.mensagem);
+        carregarDentistas();
+      } else {
+        alert('Erro: ' + resultado.erro);
+      }
+    } catch (erro) {
+      console.error(erro);
+      alert('Erro ao excluir dentista');
+    }
+  }
+
+  // 4. Função que SALVA ou ATUALIZA o dentista (POST ou PUT)
   formDentista.addEventListener('submit', async (evento) => {
-    evento.preventDefault(); 
+    evento.preventDefault();
 
     const dados = {
       nome: document.getElementById('nome').value,
@@ -158,21 +219,36 @@
     };
 
     try {
-      const resposta = await fetch('http://localhost:3000/dentistas', {
-        method: 'POST',
+      let url = 'http://localhost:3001/dentistas';
+      let metodo = 'POST';
+
+      // Se está editando, usa PUT
+      if (cpfEmEdicao) {
+        url = `http://localhost:3001/dentistas/${cpfEmEdicao}`;
+        metodo = 'PUT';
+      }
+
+      const resposta = await fetch(url, {
+        method: metodo,
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(dados) 
+        body: JSON.stringify(dados)
       });
 
       const resultado = await resposta.json();
 
       if (resposta.ok) {
         alert('Sucesso: ' + resultado.mensagem);
-        formDentista.reset(); 
+        formDentista.reset();
+        cpfEmEdicao = null;
         
-        carregarDentistas(); 
+        // Restaura o botão e os tabs
+        document.querySelector('.save').textContent = 'Salvar';
+        document.querySelectorAll('.tabs button')[0].classList.add('active');
+        document.querySelectorAll('.tabs button')[1].classList.remove('active');
+        
+        carregarDentistas();
       } else {
         alert('Aviso do Servidor: ' + resultado.erro);
       }
@@ -181,6 +257,88 @@
       alert('Erro crítico: O backend não respondeu.');
     }
   });
-</script>
+
+  // 5. Botão para limpar formulário e voltar ao cadastro
+  document.querySelectorAll('.tabs button')[0].addEventListener('click', () => {
+    formDentista.reset();
+    cpfEmEdicao = null;
+    document.querySelector('.save').textContent = 'Salvar';
+    document.querySelectorAll('.tabs button')[0].classList.add('active');
+    document.querySelectorAll('.tabs button')[1].classList.remove('active');
+  });
+
+  // 6. Função para BUSCAR dentistas
+  const buscaInput = document.getElementById('busca-input');
+  const buscaBtn = document.getElementById('busca-btn');
+
+  buscaBtn.addEventListener('click', async () => {
+    const termoBusca = buscaInput.value.trim();
+
+    if (!termoBusca) {
+      alert('Digite algo para buscar');
+      return;
+    }
+
+    try {
+      const resposta = await fetch('http://localhost:3001/dentistas');
+      const dentistas = await resposta.json();
+
+      // Filtra os dentistas baseado na busca
+      const dentistasEncontrados = dentistas.filter(dentista => 
+        dentista.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        dentista.CRO.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        dentista.especialidade.toLowerCase().includes(termoBusca.toLowerCase())
+      );
+
+      // Limpa a tabela
+      tbody.innerHTML = '';
+
+      if (dentistasEncontrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum dentista encontrado</td></tr>';
+        return;
+      }
+
+      // Mostra os resultados
+      dentistasEncontrados.forEach(dentista => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${dentista.nome}</td>
+          <td>${dentista.CRO} - ${dentista.croUF}</td>
+          <td>${dentista.especialidade}</td>
+          <td>${dentista.CPF_Dentista}</td>
+          <td>Não cadastrado</td>
+          <td>Não cadastrado</td>
+          <td>
+            <button class="edit" data-cpf="${dentista.CPF_Dentista}">Editar</button>
+            <button class="delete" data-cpf="${dentista.CPF_Dentista}">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        tr.querySelector('.edit').addEventListener('click', () => editarDentista(dentista));
+        tr.querySelector('.delete').addEventListener('click', () => excluirDentista(dentista.CPF_Dentista));
+      });
+    } catch (erro) {
+      console.error('Erro ao buscar:', erro);
+      alert('Erro ao buscar dentistas');
+    }
+  });
+
+  // Permite buscar pressionando Enter
+  buscaInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      buscaBtn.click();
+    }
+  });
+
+  // Botão para limpar busca e listar todos novamente
+  const botaoLimparBusca = document.createElement('button');
+  botaoLimparBusca.textContent = 'Limpar Busca';
+  botaoLimparBusca.style.marginLeft = '10px';
+  botaoLimparBusca.addEventListener('click', () => {
+    buscaInput.value = '';
+    carregarDentistas();
+  });
+  document.querySelector('.search-bar').appendChild(botaoLimparBusca);</script>
 </body>
 </html>

@@ -15,10 +15,10 @@
   <h1>Espaço Sorriso - Sistema de Gestão</h1>
 
   <nav>
-    <a href="#">Início</a>
+    <a href="javascript:irParaInicio()">Início</a>
     <a href="#">Relatórios</a>
     <a href="#">Configurações</a>
-    <a href="#">Sair</a>
+    <a href="javascript:sair()">Sair</a>
   </nav>
 
   <div class="profile">👤</div>
@@ -34,8 +34,8 @@
 
   <!-- BUSCA -->
   <div class="search-bar">
-    <input type="text" placeholder="Buscar por nome, CPF ou telefone...">
-    <button>Pesquisar</button>
+    <input id="busca-input" type="text" placeholder="Buscar por nome, CPF ou telefone...">
+    <button id="busca-btn">Pesquisar</button>
   </div>
 
   <div class="content">
@@ -43,14 +43,12 @@
     <!-- TABELA -->
     <div class="table-box">
 
-      <button class="btn-new">Novo Paciente</button>
-
       <table>
         <thead>
           <tr>
             <th>Nome</th>
             <th>CPF</th>
-            <th>Telefone</th>
+            <th>Email</th>
             <th>Endereço</th>
             <th>Data de Nascimento</th>
             <th>Ações</th>
@@ -81,14 +79,19 @@
         <button>Editar Paciente</button>
       </div>
 
-      <form>
-        <input placeholder="Nome*">
-        <input placeholder="CPF*">
-        <input placeholder="Telefone*">
-        <input placeholder="Endereço*">
-        <input placeholder="Data de Nascimento">
+      <form id="form-paciente">
+        <input id="nome" placeholder="Nome*">
+        <input id="cpf" placeholder="CPF*">
+        <input id="email" placeholder="Email*">
+        <input id="cep" placeholder="CEP*">
+        <input id="numero" placeholder="Número*">
+        <input id="bairro" placeholder="Bairro*">
+        <input id="logradouro" placeholder="Rua/Logradouro*">
+        <input id="cidade" placeholder="Cidade*">
+        <input id="uf" placeholder="UF (ex: SP)*">
+        <input id="data-nascimento" type="date" placeholder="Data de Nascimento">
 
-        <button class="save">Salvar</button>
+        <button type="submit" class="save">Salvar</button>
       </form>
 
     </div>
@@ -100,6 +103,228 @@
 <footer class="footer">
   <span>SAIR</span>
 </footer>
+
+<script>
+  const formPaciente = document.getElementById('form-paciente');
+  const tbody = document.querySelector('table tbody');
+  let cpfEmEdicao = null;
+
+  // 1. Função que BUSCA e DESENHA a tabela (GET)
+  async function carregarPacientes() {
+    try {
+      const resposta = await fetch('http://localhost:3000/pacientes');
+      const pacientes = await resposta.json();
+
+      tbody.innerHTML = '';
+
+      pacientes.forEach(paciente => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${paciente.nome}</td>
+          <td>${paciente.CPF_Paciente}</td>
+          <td>${paciente.email}</td>
+          <td>${paciente.logradouro}, ${paciente.numero}</td>
+          <td>${paciente.data_nascimento || 'Não informada'}</td>
+          <td>
+            <button class="edit" data-cpf="${paciente.CPF_Paciente}">Editar</button>
+            <button class="delete" data-cpf="${paciente.CPF_Paciente}">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        tr.querySelector('.edit').addEventListener('click', () => editarPaciente(paciente));
+        tr.querySelector('.delete').addEventListener('click', () => excluirPaciente(paciente.CPF_Paciente));
+      });
+    } catch (erro) {
+      console.error('Erro ao carregar tabela:', erro);
+      alert('Erro ao carregar pacientes');
+    }
+  }
+
+  carregarPacientes();
+
+  // 2. Função para EDITAR paciente
+  function editarPaciente(paciente) {
+    document.getElementById('nome').value = paciente.nome;
+    document.getElementById('cpf').value = paciente.CPF_Paciente;
+    document.getElementById('email').value = paciente.email;
+    document.getElementById('cep').value = paciente.CEP;
+    document.getElementById('numero').value = paciente.numero;
+    document.getElementById('bairro').value = paciente.bairro;
+    document.getElementById('logradouro').value = paciente.logradouro;
+    document.getElementById('cidade').value = paciente.cidade;
+    document.getElementById('uf').value = paciente.UF;
+    document.getElementById('data-nascimento').value = paciente.data_nascimento || '';
+    
+    cpfEmEdicao = paciente.CPF_Paciente;
+    
+    document.querySelector('.save').textContent = 'Atualizar';
+    document.querySelectorAll('.tabs button')[1].classList.add('active');
+    document.querySelectorAll('.tabs button')[0].classList.remove('active');
+    
+    document.querySelector('.form-box').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // 3. Função para EXCLUIR paciente
+  async function excluirPaciente(cpf) {
+    if (!confirm('Tem certeza que deseja excluir este paciente?')) {
+      return;
+    }
+
+    try {
+      const resposta = await fetch(`http://localhost:3000/pacientes/${cpf}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const resultado = await resposta.json();
+
+      if (resposta.ok) {
+        alert('Sucesso: ' + resultado.mensagem);
+        carregarPacientes();
+      } else {
+        alert('Erro: ' + resultado.erro);
+      }
+    } catch (erro) {
+      console.error(erro);
+      alert('Erro ao excluir paciente');
+    }
+  }
+
+  // 4. Função que SALVA ou ATUALIZA o paciente (POST ou PUT)
+  formPaciente.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+
+    const dados = {
+      nome: document.getElementById('nome').value,
+      cpf: document.getElementById('cpf').value,
+      email: document.getElementById('email').value,
+      cep: document.getElementById('cep').value,
+      numero: document.getElementById('numero').value,
+      bairro: document.getElementById('bairro').value,
+      logradouro: document.getElementById('logradouro').value,
+      cidade: document.getElementById('cidade').value,
+      uf: document.getElementById('uf').value,
+      data_nascimento: document.getElementById('data-nascimento').value || null
+    };
+
+    try {
+      let url = 'http://localhost:3000/pacientes';
+      let metodo = 'POST';
+
+      if (cpfEmEdicao) {
+        url = `http://localhost:3000/pacientes/${cpfEmEdicao}`;
+        metodo = 'PUT';
+      }
+
+      const resposta = await fetch(url, {
+        method: metodo,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dados)
+      });
+
+      const resultado = await resposta.json();
+
+      if (resposta.ok) {
+        alert('Sucesso: ' + resultado.mensagem);
+        formPaciente.reset();
+        cpfEmEdicao = null;
+        
+        document.querySelector('.save').textContent = 'Salvar';
+        document.querySelectorAll('.tabs button')[0].classList.add('active');
+        document.querySelectorAll('.tabs button')[1].classList.remove('active');
+        
+        carregarPacientes();
+      } else {
+        alert('Aviso do Servidor: ' + resultado.erro);
+      }
+    } catch (erro) {
+      console.error(erro);
+      alert('Erro crítico: O backend não respondeu.');
+    }
+  });
+
+  // 5. Botão para limpar formulário
+  document.querySelectorAll('.tabs button')[0].addEventListener('click', () => {
+    formPaciente.reset();
+    cpfEmEdicao = null;
+    document.querySelector('.save').textContent = 'Salvar';
+    document.querySelectorAll('.tabs button')[0].classList.add('active');
+    document.querySelectorAll('.tabs button')[1].classList.remove('active');
+  });
+
+  // 6. Função para BUSCAR pacientes
+  const buscaInput = document.getElementById('busca-input');
+  const buscaBtn = document.getElementById('busca-btn');
+
+  buscaBtn.addEventListener('click', async () => {
+    const termoBusca = buscaInput.value.trim();
+
+    if (!termoBusca) {
+      alert('Digite algo para buscar');
+      return;
+    }
+
+    try {
+      const resposta = await fetch('http://localhost:3000/pacientes');
+      const pacientes = await resposta.json();
+
+      const pacientesEncontrados = pacientes.filter(paciente => 
+        paciente.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        paciente.CPF_Paciente.includes(termoBusca) ||
+        paciente.email.toLowerCase().includes(termoBusca.toLowerCase())
+      );
+
+      tbody.innerHTML = '';
+
+      if (pacientesEncontrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum paciente encontrado</td></tr>';
+        return;
+      }
+
+      pacientesEncontrados.forEach(paciente => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${paciente.nome}</td>
+          <td>${paciente.CPF_Paciente}</td>
+          <td>${paciente.email}</td>
+          <td>${paciente.logradouro}, ${paciente.numero}</td>
+          <td>${paciente.data_nascimento || 'Não informada'}</td>
+          <td>
+            <button class="edit" data-cpf="${paciente.CPF_Paciente}">Editar</button>
+            <button class="delete" data-cpf="${paciente.CPF_Paciente}">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        tr.querySelector('.edit').addEventListener('click', () => editarPaciente(paciente));
+        tr.querySelector('.delete').addEventListener('click', () => excluirPaciente(paciente.CPF_Paciente));
+      });
+    } catch (erro) {
+      console.error('Erro ao buscar:', erro);
+      alert('Erro ao buscar pacientes');
+    }
+  });
+
+  buscaInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      buscaBtn.click();
+    }
+  });
+
+  const botaoLimparBusca = document.createElement('button');
+  botaoLimparBusca.textContent = 'Limpar Busca';
+  botaoLimparBusca.style.marginLeft = '10px';
+  botaoLimparBusca.addEventListener('click', () => {
+    buscaInput.value = '';
+    carregarPacientes();
+  });
+  document.querySelector('.search-bar').appendChild(botaoLimparBusca);
+</script>
 
 </body>
 </html>

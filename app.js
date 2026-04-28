@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import "dotenv/config";
 
 // Rotas
 import pacienteRoutes from "./paciente/paciente.routes.js";
@@ -17,5 +18,13 @@ app.get("/", (req, res) => {
 
 // Rotas da aplicação
 app.use("/pacientes", pacienteRoutes);
+
+// Rotas de dentistas (endpoint base)
+app.get("/dentistas", async (req, res) => {
+  res.json({ 
+    mensagem: "Acesse o servidor de dentistas em http://localhost:3001",
+    info: "Rotas disponíveis: POST/GET/PUT/DELETE /dentistas"
+  });
+});
 
 export default app;
