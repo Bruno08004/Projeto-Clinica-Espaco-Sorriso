@@ -1,0 +1,29 @@
+{
+  "name": "clinica-espaco-sorriso",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão para Consultório Odontológico",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "start:dentista": "node backend/dentista/server.js",
+    "dev:dentista": "nodemon backend/dentista/server.js"
+  },
+  "keywords": [
+    "dentista",
+    "paciente",
+    "consultório"
+  ],
+  "author": "Espaço Sorriso",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.21.0",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
