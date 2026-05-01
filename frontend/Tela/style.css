@@ -199,3 +199,147 @@ nav a:hover {
 .footer button:active {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* MODAL CUSTOMIZADO */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+  text-align: center;
+}
+
+.modal-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.modal-message {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 10px 24px;
+  border-radius: 20px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.modal-btn-primary {
+  background: #2aa3a3;
+  color: white;
+}
+
+.modal-btn-primary:hover {
+  background: #259090;
+  transform: translateY(-2px);
+}
+
+.modal-btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.modal-btn-secondary:hover {
+  background: #e8e8e8;
+}
+
+.modal-btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.modal-btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+.modal-btn-success {
+  background: #27ae60;
+  color: white;
+}
+
+.modal-btn-success:hover {
+  background: #229954;
+  transform: translateY(-2px);
+}
+
+/* TIPOS DE MODAL */
+.modal-success .modal-icon {
+  color: #27ae60;
+}
+
+.modal-error .modal-icon {
+  color: #e74c3c;
+}
+
+.modal-warning .modal-icon {
+  color: #f39c12;
+}
+
+.modal-info .modal-icon {
+  color: #2aa3a3;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

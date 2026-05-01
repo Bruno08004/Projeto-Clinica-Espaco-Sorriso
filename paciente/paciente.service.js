@@ -13,7 +13,8 @@ export const cadastrarPaciente = async (dados) => {
     bairro,
     logradouro,
     cidade,
-    uf
+    uf,
+    telefone
   } = dados;
 
   if (!nome || !cpf || !email || !cep || !numero || !bairro || !logradouro || !cidade || !uf) {
@@ -35,7 +36,7 @@ export const cadastrarPaciente = async (dados) => {
     throw new Error("Paciente já cadastrado.");
   }
 
-  return await repository.cadastrarPaciente({
+  const resultado = await repository.cadastrarPaciente({
     nome,
     cpf: cpfLimpo,
     email,
@@ -46,6 +47,13 @@ export const cadastrarPaciente = async (dados) => {
     cidade,
     uf
   });
+
+  // Salvar telefone se fornecido
+  if (telefone) {
+    await repository.salvarTelefone(cpfLimpo, telefone);
+  }
+
+  return resultado;
 };
 
 // READ - listar ou buscar
@@ -82,7 +90,8 @@ export const atualizarPaciente = async (cpfParam, dados) => {
     bairro,
     logradouro,
     cidade,
-    uf
+    uf,
+    telefone
   } = dados;
 
   if (!nome || !cpf || !email || !cep || !numero || !bairro || !logradouro || !cidade || !uf) {
@@ -111,7 +120,7 @@ export const atualizarPaciente = async (cpfParam, dados) => {
     throw new Error("CPF já cadastrado para outro paciente.");
   }
 
-  return await repository.atualizarPaciente(cpfParam, {
+  await repository.atualizarPaciente(cpfParam, {
     nome,
     cpf: cpfLimpo,
     email,
@@ -122,6 +131,13 @@ export const atualizarPaciente = async (cpfParam, dados) => {
     cidade,
     uf
   });
+
+  // Salvar ou atualizar telefone se fornecido
+  if (telefone) {
+    await repository.salvarTelefone(cpfLimpo, telefone);
+  }
+
+  return true;
 };
 
 // DELETE
@@ -132,6 +148,9 @@ export const excluirPaciente = async (cpf) => {
   if (!paciente) {
     throw new Error("Paciente não encontrado.");
   }
+
+  // Deletar telefone associado
+  await repository.deletarTelefone(cpf);
 
   return await repository.excluirPaciente(cpf);
 };

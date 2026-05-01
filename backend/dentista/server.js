@@ -39,7 +39,7 @@ app.post('/dentistas', async (req, res) => {
         }
 
         const query = 'INSERT INTO dentista (CPF_Dentista, nome, CRO, croUF, especialidade) VALUES (?, ?, ?, ?, ?)';
-        const [result] = await db.execute(query, [CPF_Dentista, nome, CRO, croUF, especialidade]);
+        await db.execute(query, [CPF_Dentista, nome, CRO, croUF, especialidade]);
 
         res.status(201).json({ 
             mensagem: 'Dentista cadastrado com sucesso!',

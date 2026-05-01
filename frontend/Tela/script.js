@@ -1,3 +1,74 @@
+// ===== FUNÇÕES DE MODAL =====
+function showModal(title, message, type = 'info', buttons = []) {
+  const modal = document.getElementById('modal');
+  const iconEl = document.getElementById('modal-icon');
+  const titleEl = document.getElementById('modal-title');
+  const messageEl = document.getElementById('modal-message');
+  const buttonsEl = document.getElementById('modal-buttons');
+
+  // Definir ícone e classe baseado no tipo
+  const icons = {
+    success: '✓',
+    error: '✕',
+    warning: '⚠',
+    info: 'ℹ',
+    confirm: '?'
+  };
+
+  modal.className = 'modal-overlay active modal-' + type;
+  iconEl.textContent = icons[type] || icons.info;
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+  
+  // Limpar botões antigos
+  buttonsEl.innerHTML = '';
+
+  // Adicionar botões
+  buttons.forEach(btn => {
+    const button = document.createElement('button');
+    button.className = 'modal-btn ' + (btn.className || 'modal-btn-secondary');
+    button.textContent = btn.text;
+    button.onclick = () => {
+      btn.action();
+      modal.classList.remove('active');
+    };
+    buttonsEl.appendChild(button);
+  });
+
+  // Fechar ao clicar no overlay
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('active');
+    }
+  };
+}
+
+function showAlert(title, message, type = 'info') {
+  showModal(title, message, type, [
+    {
+      text: 'OK',
+      className: 'modal-btn-primary',
+      action: () => {}
+    }
+  ]);
+}
+
+function showConfirm(title, message, onConfirm, onCancel = null) {
+  showModal(title, message, 'confirm', [
+    {
+      text: 'Cancelar',
+      className: 'modal-btn-secondary',
+      action: onCancel || (() => {})
+    },
+    {
+      text: 'Confirmar',
+      className: 'modal-btn-danger',
+      action: onConfirm
+    }
+  ]);
+}
+
+// ===== FUNÇÕES PRINCIPAIS =====
 function navigate(page) {
   // Adiciona efeito de carregamento
   const cards = document.querySelectorAll('.card');
@@ -21,36 +92,39 @@ function navigate(page) {
       break;
 
     case "atendimentos":
-      alert("🚧 Gestão de Atendimentos em desenvolvimento");
+      showAlert('Em Desenvolvimento', '🚧 Gestão de Atendimentos em desenvolvimento', 'warning');
       cards.forEach(card => card.style.opacity = '1');
       break;
 
     case "pagamentos":
-      alert("🚧 Gestão de Pagamentos em desenvolvimento");
+      showAlert('Em Desenvolvimento', '🚧 Gestão de Pagamentos em desenvolvimento', 'warning');
       cards.forEach(card => card.style.opacity = '1');
       break;
 
     case "comissao":
-      alert("🚧 Gestão de Comissão em desenvolvimento");
+      showAlert('Em Desenvolvimento', '🚧 Gestão de Comissão em desenvolvimento', 'warning');
       cards.forEach(card => card.style.opacity = '1');
       break;
 
     case "procedimentos":
-      alert("🚧 Gestão de Procedimentos em desenvolvimento");
+      showAlert('Em Desenvolvimento', '🚧 Gestão de Procedimentos em desenvolvimento', 'warning');
       cards.forEach(card => card.style.opacity = '1');
       break;
 
     default:
-      alert("Essa parte ainda não foi criada");
+      showAlert('Atenção', 'Essa parte ainda não foi criada', 'warning');
       cards.forEach(card => card.style.opacity = '1');
   }
 }
 
 function logout() {
-  if (confirm("Tem certeza que deseja sair?")) {
-    alert("Até logo!");
-    // Pode redirecionar para uma página de login ou home
-  }
+  showConfirm(
+    'Sair do Sistema',
+    'Tem certeza que deseja sair?',
+    () => {
+      showAlert('Até Logo!', 'Você foi desconectado do sistema.', 'success');
+    }
+  );
 }
 
 // Adiciona transição suave ao carregar a página
