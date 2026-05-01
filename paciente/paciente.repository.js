@@ -26,7 +26,9 @@ export const cadastrarPaciente = async (dados) => {
 // READ por CPF
 export const buscarPorCPF = async (cpf) => {
   const [rows] = await connection.execute(
-    "SELECT * FROM paciente WHERE CPF_Paciente = ?",
+    `SELECT p.*, t.telefone FROM paciente p 
+     LEFT JOIN telefone t ON p.CPF_Paciente = t.CPF_Paciente 
+     WHERE p.CPF_Paciente = ?`,
     [cpf]
   );
   return rows[0];
@@ -35,7 +37,8 @@ export const buscarPorCPF = async (cpf) => {
 // LISTAR TODOS
 export const listarTodos = async () => {
   const [rows] = await connection.execute(
-    "SELECT * FROM paciente"
+    `SELECT p.*, t.telefone FROM paciente p 
+     LEFT JOIN telefone t ON p.CPF_Paciente = t.CPF_Paciente`
   );
   return rows;
 };
@@ -43,11 +46,12 @@ export const listarTodos = async () => {
 // BUSCA
 export const consultarPaciente = async (busca) => {
   const [rows] = await connection.execute(
-    `SELECT * FROM paciente 
-     WHERE nome LIKE ? 
-        OR CPF_Paciente LIKE ? 
-        OR email LIKE ? 
-        OR cidade LIKE ?`,
+    `SELECT p.*, t.telefone FROM paciente p 
+     LEFT JOIN telefone t ON p.CPF_Paciente = t.CPF_Paciente
+     WHERE p.nome LIKE ? 
+        OR p.CPF_Paciente LIKE ? 
+        OR p.email LIKE ? 
+        OR p.cidade LIKE ?`,
     [`%${busca}%`, `%${busca}%`, `%${busca}%`, `%${busca}%`]
   );
   return rows;
@@ -90,6 +94,31 @@ export const atualizarPaciente = async (cpfParam, dados) => {
 export const excluirPaciente = async (cpf) => {
   const [result] = await connection.execute(
     "DELETE FROM paciente WHERE CPF_Paciente = ?",
+    [cpf]
+  );
+  return result;
+};
+
+// SALVAR TELEFONE
+export const salvarTelefone = async (cpf, telefone) => {
+  if (!telefone) return;
+
+  await connection.execute(
+    "DELETE FROM telefone WHERE CPF_Paciente = ?",
+    [cpf]
+  );
+
+  const [result] = await connection.execute(
+    "INSERT INTO telefone (telefone, CPF_Paciente) VALUES (?, ?)",
+    [telefone, cpf]
+  );
+  return result;
+};
+
+// DELETAR TELEFONE
+export const deletarTelefone = async (cpf) => {
+  const [result] = await connection.execute(
+    "DELETE FROM telefone WHERE CPF_Paciente = ?",
     [cpf]
   );
   return result;

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Dentistas</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../global.css">
 </head>
 <body>
 
@@ -35,7 +36,7 @@
 
   <!-- BUSCA -->
   <div class="search-bar">
-    <input id="busca-input" type="text" placeholder="Buscar por nome do dentista, CRO ou telefone...">
+    <input id="busca-input" type="text" placeholder="Buscar por nome do dentista, CRO ou especialidade...">
     <button id="busca-btn">Pesquisar</button>
   </div>
 
@@ -51,8 +52,6 @@
             <th>CRO</th>
             <th>Especialidade</th>
             <th>CPF</th>
-            <th>Telefone</th>
-            <th>Endereço</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -63,8 +62,6 @@
             <td>SP-12345</td>
             <td>Ortodontia</td>
             <td>---</td>
-            <td>(11) 98765-4321</td>
-            <td>Rua Alameda, 123</td>
             <td>
               <button class="edit">Editar</button>
               <button class="delete">Excluir</button>
@@ -88,9 +85,6 @@
         <input id="uf" placeholder="UF do CRO (ex: BA, SP)*">
         <input id="especialidade" placeholder="Especialidade*">
         <input id="cpf" placeholder="CPF">
-        <input placeholder="Telefone*">
-        <input placeholder="Endereço">
-        <input placeholder="Data de Nascimento">
 
         <button type="submit" class="save">Salvar</button>
       </form>
@@ -105,22 +99,135 @@
   <span>SAIR</span>
 </footer>
 
+<!-- MODAL CUSTOMIZADO -->
+<div id="modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-message" id="modal-message"></div>
+    <div class="modal-buttons" id="modal-buttons"></div>
+  </div>
+</div>
+
 <script>
+  // ===== FUNÇÕES DE MODAL =====
+  const modalElement = document.getElementById('modal');
+
+  function showModal(title, message, type = 'info', buttons = []) {
+    const modal = document.getElementById('modal');
+    const iconEl = document.getElementById('modal-icon');
+    const titleEl = document.getElementById('modal-title');
+    const messageEl = document.getElementById('modal-message');
+    const buttonsEl = document.getElementById('modal-buttons');
+
+    // Definir ícone e classe baseado no tipo
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '⚠',
+      info: 'ℹ',
+      confirm: '?'
+    };
+
+    modal.className = 'modal-overlay active modal-' + type;
+    iconEl.textContent = icons[type] || icons.info;
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Limpar botões antigos
+    buttonsEl.innerHTML = '';
+
+    // Adicionar botões
+    buttons.forEach(btn => {
+      const button = document.createElement('button');
+      button.className = 'modal-btn ' + (btn.className || 'modal-btn-secondary');
+      button.textContent = btn.text;
+      button.onclick = () => {
+        btn.action();
+        modal.classList.remove('active');
+      };
+      buttonsEl.appendChild(button);
+    });
+
+    // Fechar ao clicar no overlay
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    };
+  }
+
+  function showAlert(title, message, type = 'info') {
+    showModal(title, message, type, [
+      {
+        text: 'OK',
+        className: 'modal-btn-primary',
+        action: () => {}
+      }
+    ]);
+  }
+
+  function showConfirm(title, message, onConfirm, onCancel = null) {
+    showModal(title, message, 'confirm', [
+      {
+        text: 'Cancelar',
+        className: 'modal-btn-secondary',
+        action: onCancel || (() => {})
+      },
+      {
+        text: 'Confirmar',
+        className: 'modal-btn-danger',
+        action: onConfirm
+      }
+    ]);
+  }
+
+  // ===== FUNÇÕES PRINCIPAIS =====
   // Funções de navegação
   function irParaInicio() {
     window.location.href = '../../Tela/index.html';
   }
 
   function sair() {
-    if (confirm('Tem certeza que deseja sair? Qualquer dados não salvos serão perdidos.')) {
-      alert('Até logo!');
-      window.location.href = '../../Tela/index.html';
-    }
+    showConfirm(
+      'Sair do Sistema',
+      'Tem certeza que deseja sair? Qualquer dados não salvos serão perdidos.',
+      () => {
+        window.location.href = '../../Tela/index.html';
+      }
+    );
   }
 
   const formDentista = document.getElementById('form-dentista');
   const tbody = document.querySelector('table tbody');
   let cpfEmEdicao = null; // Armazena o CPF em edição
+
+  function renderizarDentistas(dentistas) {
+    tbody.innerHTML = '';
+
+    if (dentistas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dentista encontrado</td></tr>';
+      return;
+    }
+
+    dentistas.forEach(dentista => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${dentista.nome || '-'}</td>
+        <td>${dentista.CRO || '-'} - ${dentista.croUF || '-'}</td>
+        <td>${dentista.especialidade || '-'}</td>
+        <td>${dentista.CPF_Dentista || '-'}</td>
+        <td>
+          <button class="edit" data-cpf="${dentista.CPF_Dentista}">Editar</button>
+          <button class="delete" data-cpf="${dentista.CPF_Dentista}">Excluir</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+
+      tr.querySelector('.edit').addEventListener('click', () => editarDentista(dentista));
+      tr.querySelector('.delete').addEventListener('click', () => excluirDentista(dentista.CPF_Dentista));
+    });
+  }
 
   // 1. Função que BUSCA e DESENHA a tabela (GET)
   async function carregarDentistas() {
@@ -128,31 +235,10 @@
       const resposta = await fetch('http://localhost:3001/dentistas');
       const dentistas = await resposta.json();
 
-      tbody.innerHTML = '';
-
-      dentistas.forEach(dentista => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${dentista.nome}</td>
-          <td>${dentista.CRO} - ${dentista.croUF}</td>
-          <td>${dentista.especialidade}</td>
-          <td>${dentista.CPF_Dentista}</td>
-          <td>Não cadastrado</td>
-          <td>Não cadastrado</td>
-          <td>
-            <button class="edit" data-cpf="${dentista.CPF_Dentista}">Editar</button>
-            <button class="delete" data-cpf="${dentista.CPF_Dentista}">Excluir</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-
-        // Adiciona eventos aos botões Editar e Excluir
-        tr.querySelector('.edit').addEventListener('click', () => editarDentista(dentista));
-        tr.querySelector('.delete').addEventListener('click', () => excluirDentista(dentista.CPF_Dentista));
-      });
+      renderizarDentistas(dentistas);
     } catch (erro) {
       console.error('Erro ao carregar tabela:', erro);
-      alert('Erro ao carregar dentistas');
+      showAlert('Erro', 'Erro ao carregar dentistas', 'error');
     }
   }
 
@@ -180,30 +266,32 @@
 
   // 3. Função para EXCLUIR dentista
   async function excluirDentista(cpf) {
-    if (!confirm('Tem certeza que deseja excluir este dentista?')) {
-      return;
-    }
+    showConfirm(
+      'Excluir Dentista',
+      'Tem certeza que deseja excluir este dentista? Esta ação não pode ser desfeita.',
+      async () => {
+        try {
+          const resposta = await fetch(`http://localhost:3001/dentistas/${cpf}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
 
-    try {
-      const resposta = await fetch(`http://localhost:3001/dentistas/${cpf}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
+          const resultado = await resposta.json();
+
+          if (resposta.ok) {
+            showAlert('Sucesso!', resultado.mensagem, 'success');
+            carregarDentistas();
+          } else {
+            showAlert('Erro', resultado.erro, 'error');
+          }
+        } catch (erro) {
+          console.error(erro);
+          showAlert('Erro', 'Erro ao excluir dentista', 'error');
         }
-      });
-
-      const resultado = await resposta.json();
-
-      if (resposta.ok) {
-        alert('Sucesso: ' + resultado.mensagem);
-        carregarDentistas();
-      } else {
-        alert('Erro: ' + resultado.erro);
       }
-    } catch (erro) {
-      console.error(erro);
-      alert('Erro ao excluir dentista');
-    }
+    );
   }
 
   // 4. Função que SALVA ou ATUALIZA o dentista (POST ou PUT)
@@ -239,7 +327,7 @@
       const resultado = await resposta.json();
 
       if (resposta.ok) {
-        alert('Sucesso: ' + resultado.mensagem);
+        showAlert('Sucesso!', resultado.mensagem, 'success');
         formDentista.reset();
         cpfEmEdicao = null;
         
@@ -250,11 +338,11 @@
         
         carregarDentistas();
       } else {
-        alert('Aviso do Servidor: ' + resultado.erro);
+        showAlert('Aviso', resultado.erro, 'warning');
       }
     } catch (erro) {
       console.error(erro);
-      alert('Erro crítico: O backend não respondeu.');
+      showAlert('Erro', 'O backend não respondeu.', 'error');
     }
   });
 
@@ -275,7 +363,7 @@
     const termoBusca = buscaInput.value.trim();
 
     if (!termoBusca) {
-      alert('Digite algo para buscar');
+      showAlert('Campo vazio', 'Digite algo para buscar', 'warning');
       return;
     }
 
@@ -285,42 +373,15 @@
 
       // Filtra os dentistas baseado na busca
       const dentistasEncontrados = dentistas.filter(dentista => 
-        dentista.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
-        dentista.CRO.toLowerCase().includes(termoBusca.toLowerCase()) ||
-        dentista.especialidade.toLowerCase().includes(termoBusca.toLowerCase())
+        (dentista.nome || '').toLowerCase().includes(termoBusca.toLowerCase()) ||
+        (dentista.CRO || '').toLowerCase().includes(termoBusca.toLowerCase()) ||
+        (dentista.especialidade || '').toLowerCase().includes(termoBusca.toLowerCase())
       );
 
-      // Limpa a tabela
-      tbody.innerHTML = '';
-
-      if (dentistasEncontrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum dentista encontrado</td></tr>';
-        return;
-      }
-
-      // Mostra os resultados
-      dentistasEncontrados.forEach(dentista => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${dentista.nome}</td>
-          <td>${dentista.CRO} - ${dentista.croUF}</td>
-          <td>${dentista.especialidade}</td>
-          <td>${dentista.CPF_Dentista}</td>
-          <td>Não cadastrado</td>
-          <td>Não cadastrado</td>
-          <td>
-            <button class="edit" data-cpf="${dentista.CPF_Dentista}">Editar</button>
-            <button class="delete" data-cpf="${dentista.CPF_Dentista}">Excluir</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-
-        tr.querySelector('.edit').addEventListener('click', () => editarDentista(dentista));
-        tr.querySelector('.delete').addEventListener('click', () => excluirDentista(dentista.CPF_Dentista));
-      });
+      renderizarDentistas(dentistasEncontrados);
     } catch (erro) {
       console.error('Erro ao buscar:', erro);
-      alert('Erro ao buscar dentistas');
+      showAlert('Erro', 'Erro ao buscar dentistas', 'error');
     }
   });
 
