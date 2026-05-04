@@ -285,22 +285,36 @@ form {
   gap: 10px;
 }
 
-form input {
+form input,
+form select {
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid #ddd;
   font-size: 14px;
-  color: #333;
+  color: #666;
+  background: white;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-form input:focus {
+form select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+
+form input:focus,
+form select:focus {
   border-color: #2aa3a3;
   box-shadow: 0 0 0 3px rgba(42,163,163,0.1);
 }
 
-form input::placeholder {
+form input::placeholder,
+form select option[value=""] {
   color: #aaa;
   font-size: 13px;
 }

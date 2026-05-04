@@ -32,3 +32,89 @@
 .topbar .profile {
   align-self: center;
 }
+
+/* BOTÕES UNIFORMES */
+button,
+.btn {
+  border: none;
+  outline: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+button:hover,
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+button:active,
+.btn:active {
+  transform: translateY(0);
+}
+
+.save,
+.btn-primary,
+.search-bar button,
+.footer button,
+.edit,
+.btn-new,
+.modal-btn {
+  background: #2aa3a3;
+  color: white;
+}
+
+.save:hover,
+.btn-primary:hover,
+.search-bar button:hover,
+.footer button:hover,
+.edit:hover,
+.btn-new:hover,
+.modal-btn:hover {
+  background: #259090;
+}
+
+.btn-secondary,
+.modal-btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #daeaea;
+}
+
+.btn-secondary:hover,
+.modal-btn-secondary:hover {
+  background: #e8f2f2;
+}
+
+.delete,
+.modal-btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.delete:hover,
+.modal-btn-danger:hover {
+  background: #c0392b;
+}
+
+button[disabled],
+.btn[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+select,
+input {
+  border-radius: 16px;
+  border: 1px solid #d9e6e6;
+}
+

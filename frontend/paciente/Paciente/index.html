@@ -103,7 +103,7 @@
 </main>
 
 <footer class="footer">
-  <span>SAIR</span>
+  <button onclick="sair()">SAIR</button>
 </footer>
 
 <!-- MODAL CUSTOMIZADO -->
@@ -319,7 +319,8 @@
       const resultado = await resposta.json();
 
       if (resposta.ok) {
-        showAlert('Sucesso!', resultado.mensagem, 'success');
+        const mensagemSucesso = resultado.mensagem || (cpfEmEdicao ? 'Dados atualizados com sucesso' : 'Cadastro realizado com sucesso');
+        showAlert('Sucesso!', mensagemSucesso, 'success');
         formPaciente.reset();
         cpfEmEdicao = null;
         
@@ -371,7 +372,7 @@
       tbody.innerHTML = '';
 
       if (pacientesEncontrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum paciente encontrado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Paciente não encontrado</td></tr>';
         return;
       }
 

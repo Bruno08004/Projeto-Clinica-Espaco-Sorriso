@@ -127,6 +127,48 @@ function logout() {
   );
 }
 
+function pesquisarTela() {
+  const input = document.getElementById('tela-busca-input');
+  const termo = input.value.trim().toLowerCase();
+  const cards = Array.from(document.querySelectorAll('.card'));
+
+  if (!termo) {
+    showAlert('Busca vazia', 'Digite algo para pesquisar', 'warning');
+    return;
+  }
+
+  const rotas = {
+    pacientes: 'pacientes',
+    dentistas: 'dentistas',
+    atendimentos: 'atendimentos',
+    pagamentos: 'pagamentos',
+    comissao: 'comissao',
+    procedimentos: 'procedimentos'
+  };
+
+  for (const chave of Object.keys(rotas)) {
+    if (termo.includes(chave)) {
+      navigate(rotas[chave]);
+      return;
+    }
+  }
+
+  let encontrou = false;
+  cards.forEach(card => {
+    const texto = card.textContent.toLowerCase();
+    if (texto.includes(termo)) {
+      card.style.display = 'flex';
+      encontrou = true;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  if (!encontrou) {
+    showAlert('Nenhum resultado', 'Nenhum item corresponde à busca.', 'warning');
+  }
+}
+
 // Adiciona transição suave ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Sistema Espaço Sorriso carregado com sucesso! ✅');
@@ -154,3 +196,15 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+const telaBuscaBtn = document.getElementById('tela-busca-btn');
+const telaBuscaInput = document.getElementById('tela-busca-input');
+if (telaBuscaBtn && telaBuscaInput) {
+  telaBuscaBtn.addEventListener('click', pesquisarTela);
+  telaBuscaInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      pesquisarTela();
+    }
+  });
+}

@@ -25,6 +25,30 @@ try {
     process.exit(1);
 }
 
+const croPattern = /^\d{5}$/;
+const ufPattern = /^[A-Za-z]{2}$/;
+const especialidadesValidas = ['CLÍNICO', 'ORTODÔNTICO'];
+
+function validarDadosDentista({ CPF_Dentista, nome, CRO, croUF, especialidade }) {
+    if (!CPF_Dentista || !nome || !CRO || !croUF || !especialidade) {
+        return 'Preencha todos os campos obrigatórios';
+    }
+
+    if (!croPattern.test(CRO)) {
+        return 'CRO inválido. Use exatamente 5 números, ex: 12345.';
+    }
+
+    if (!ufPattern.test(croUF)) {
+        return 'UF do CRO inválida. Use duas letras, ex: SP.';
+    }
+
+    if (!especialidadesValidas.includes(especialidade.toUpperCase())) {
+        return 'Especialidade inválida. Escolha CLÍNICO ou ORTODÔNTICO.';
+    }
+
+    return null;
+}
+
 // ==========================================
 // ROTAS DO MÓDULO DE DENTISTAS
 // ==========================================
@@ -33,13 +57,18 @@ try {
 app.post('/dentistas', async (req, res) => {
     try {
         const { CPF_Dentista, nome, CRO, croUF, especialidade } = req.body;
+        const erroValidacao = validarDadosDentista({ CPF_Dentista, nome, CRO, croUF, especialidade });
 
-        if (!CPF_Dentista || !nome || !CRO || !croUF || !especialidade) {
-            return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios' });
+        if (erroValidacao) {
+            return res.status(400).json({ erro: erroValidacao });
         }
 
+        const croFormatado = CRO;
+        const croUFFormatado = croUF.toUpperCase();
+        const especialidadeFormatada = especialidade.toUpperCase();
+
         const query = 'INSERT INTO dentista (CPF_Dentista, nome, CRO, croUF, especialidade) VALUES (?, ?, ?, ?, ?)';
-        await db.execute(query, [CPF_Dentista, nome, CRO, croUF, especialidade]);
+        await db.execute(query, [CPF_Dentista, nome, croFormatado, croUFFormatado, especialidadeFormatada]);
 
         res.status(201).json({ 
             mensagem: 'Dentista cadastrado com sucesso!',
@@ -89,9 +118,18 @@ app.put('/dentistas/:cpf', async (req, res) => {
     try {
         const { cpf } = req.params;
         const { nome, CRO, croUF, especialidade } = req.body;
+        const erroValidacao = validarDadosDentista({ CPF_Dentista: cpf, nome, CRO, croUF, especialidade });
+
+        if (erroValidacao) {
+            return res.status(400).json({ erro: erroValidacao });
+        }
+
+        const croFormatado = CRO;
+        const croUFFormatado = croUF.toUpperCase();
+        const especialidadeFormatada = especialidade.toUpperCase();
 
         const query = 'UPDATE dentista SET nome = ?, CRO = ?, croUF = ?, especialidade = ? WHERE CPF_Dentista = ?';
-        const [result] = await db.execute(query, [nome, CRO, croUF, especialidade, cpf]);
+        const [result] = await db.execute(query, [nome, croFormatado, croUFFormatado, especialidadeFormatada, cpf]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ erro: 'Dentista não encontrado com o CPF informado.' });

@@ -81,9 +81,13 @@
 
       <form id="form-dentista">
         <input id="nome" placeholder="Nome*">
-        <input id="cro" placeholder="CRO*">
+        <input id="cro" placeholder="CRO (apenas números)*">
         <input id="uf" placeholder="UF do CRO (ex: BA, SP)*">
-        <input id="especialidade" placeholder="Especialidade*">
+        <select id="especialidade">
+          <option value="">Selecione a especialidade*</option>
+          <option value="CLÍNICO">CLÍNICO</option>
+          <option value="ORTODÔNTICO">ORTODÔNTICO</option>
+        </select>
         <input id="cpf" placeholder="CPF">
 
         <button type="submit" class="save">Salvar</button>
@@ -96,7 +100,7 @@
 </main>
 
 <footer class="footer">
-  <span>SAIR</span>
+  <button onclick="sair()">SAIR</button>
 </footer>
 
 <!-- MODAL CUSTOMIZADO -->
@@ -206,7 +210,7 @@
     tbody.innerHTML = '';
 
     if (dentistas.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dentista encontrado</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Dentista não encontrado</td></tr>';
       return;
     }
 
@@ -299,12 +303,34 @@
     evento.preventDefault();
 
     const dados = {
-      nome: document.getElementById('nome').value,
-      CRO: document.getElementById('cro').value,
-      croUF: document.getElementById('uf').value,
-      especialidade: document.getElementById('especialidade').value,
-      CPF_Dentista: document.getElementById('cpf').value
+      nome: document.getElementById('nome').value.trim(),
+      CRO: document.getElementById('cro').value.trim(),
+      croUF: document.getElementById('uf').value.trim(),
+      especialidade: document.getElementById('especialidade').value.trim(),
+      CPF_Dentista: document.getElementById('cpf').value.trim()
     };
+
+    const croPattern = /^\d{5}$/;
+    const ufPattern = /^[A-Za-z]{2}$/;
+    const especialidadeValida = ['CLÍNICO', 'ORTODÔNTICO'];
+
+    if (!dados.CRO || !croPattern.test(dados.CRO)) {
+      showAlert('Aviso', 'Informe o CRO com exatamente 5 números, ex: 12345', 'warning');
+      return;
+    }
+
+    if (!dados.croUF || !ufPattern.test(dados.croUF)) {
+      showAlert('Aviso', 'Informe a UF do CRO com duas letras, ex: SP', 'warning');
+      return;
+    }
+
+    if (!especialidadeValida.includes(dados.especialidade.toUpperCase())) {
+      showAlert('Aviso', 'Escolha a especialidade CLÍNICO ou ORTODÔNTICO', 'warning');
+      return;
+    }
+
+    dados.croUF = dados.croUF.toUpperCase();
+    dados.especialidade = dados.especialidade.toUpperCase();
 
     try {
       let url = 'http://localhost:3001/dentistas';
@@ -327,7 +353,8 @@
       const resultado = await resposta.json();
 
       if (resposta.ok) {
-        showAlert('Sucesso!', resultado.mensagem, 'success');
+        const mensagemSucesso = resultado.mensagem || (cpfEmEdicao ? 'Dados atualizados com sucesso' : 'Cadastro realizado com sucesso');
+        showAlert('Sucesso!', mensagemSucesso, 'success');
         formDentista.reset();
         cpfEmEdicao = null;
         
