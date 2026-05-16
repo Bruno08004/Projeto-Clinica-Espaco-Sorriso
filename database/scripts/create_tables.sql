@@ -100,6 +100,7 @@ CREATE TABLE `paciente` (
   `logradouro` varchar(100) NOT NULL,
   `cidade` varchar(100) NOT NULL,
   `UF` enum('AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO') NOT NULL,
+  `dataNascimento` date DEFAULT NULL,
   PRIMARY KEY (`CPF_Paciente`),
   UNIQUE KEY `email` (`email`),
   KEY `idx_nome` (`nome`)
@@ -159,13 +160,29 @@ CREATE TABLE `secretaria` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `telefone`
+-- Table structure for table `telefone_dentista`
 --
 
-DROP TABLE IF EXISTS `telefone`;
+DROP TABLE IF EXISTS `telefone_dentista`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `telefone` (
+CREATE TABLE `telefone_dentista` (
+  `telefone` varchar(15) NOT NULL,
+  `CPF_Dentista` varchar(11) NOT NULL,
+  PRIMARY KEY (`telefone`,`CPF_Dentista`),
+  KEY `CPF_Dentista` (`CPF_Dentista`),
+  CONSTRAINT `telefone_dentista_ibfk_1` FOREIGN KEY (`CPF_Dentista`) REFERENCES `dentista` (`CPF_Dentista`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `telefone_paciente`
+--
+
+DROP TABLE IF EXISTS `telefone_paciente`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `telefone_paciente` (
   `telefone` varchar(15) NOT NULL,
   `CPF_Paciente` varchar(11) NOT NULL,
   PRIMARY KEY (`telefone`,`CPF_Paciente`),
@@ -183,4 +200,4 @@ CREATE TABLE `telefone` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-15 21:49:20
+-- Dump completed on 2026-05-15 22:27:07
