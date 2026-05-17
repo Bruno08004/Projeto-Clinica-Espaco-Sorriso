@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Atendimentos</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../global.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">
+    <img src="../../assests/logo.png" alt="Espaço Sorriso">
+  </div>
+  <h1>Espaço Sorriso - Sistema de Gestão</h1>
+  <nav>
+    <a href="javascript:irParaInicio()">Início</a>
+    <a href="#">Relatórios</a>
+    <a href="#">Configurações</a>
+    <a href="javascript:sair()">Sair</a>
+  </nav>
+  <div class="profile">👤</div>
+</header>
+
+<main class="container">
+  <div class="title">
+    <h2>Gerenciamento de Atendimentos</h2>
+    <p>Registre consultas, valores, paciente responsável e dados do item executado.</p>
+  </div>
+
+  <div class="search-bar">
+    <input id="busca-input" type="text" placeholder="Buscar por ID, CPF do paciente, tipo ou data...">
+    <button id="busca-btn">Pesquisar</button>
+  </div>
+
+  <div class="content">
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Tipo</th>
+            <th>Paciente</th>
+            <th>Valor Total</th>
+            <th>Parcelas</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="form-box">
+      <div class="tabs">
+        <button class="active" type="button">Cadastrar Atendimento</button>
+        <button type="button">Editar Atendimento</button>
+      </div>
+
+      <form id="form-atendimento">
+        <input id="data" type="date" placeholder="Data*">
+        <select id="tipoAtendimento">
+          <option value="">Selecione o tipo*</option>
+          <option value="CLÍNICO">CLÍNICO</option>
+          <option value="ORTODÔNTICO">ORTODÔNTICO</option>
+        </select>
+        <input id="cpf-paciente" placeholder="CPF do paciente*">
+        <input id="cpf-secretaria" placeholder="CPF da secretária*">
+        <input id="valor-total" type="number" min="0" step="0.01" placeholder="Valor total*">
+        <input id="parcelas" type="number" min="1" placeholder="Parcelas">
+        <textarea id="observacao" placeholder="Observação"></textarea>
+
+        <input id="id-procedimento" type="number" min="1" placeholder="ID do procedimento executado">
+        <input id="cpf-dentista" placeholder="CPF do dentista">
+        <input id="qtd" type="number" min="1" placeholder="Quantidade">
+        <input id="valor-unit" type="number" min="0" step="0.01" placeholder="Valor unitário">
+        <input id="desconto-item" type="number" min="0" step="0.01" placeholder="Desconto do item">
+        <input id="comissao-dentista" type="number" min="0" step="0.01" placeholder="Comissão do dentista">
+
+        <button type="submit" class="save">Salvar</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <button onclick="sair()">SAIR</button>
+</footer>
+
+<div id="modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-message" id="modal-message"></div>
+    <div class="modal-buttons" id="modal-buttons"></div>
+  </div>
+</div>
+
+<script>
+  const API_URL = 'http://localhost:3000/atendimentos';
+  const tbody = document.querySelector('table tbody');
+  const formAtendimento = document.getElementById('form-atendimento');
+  let idEmEdicao = null;
+  let atendimentosCache = [];
+
+  function showModal(title, message, type = 'info', buttons = []) {
+    const modal = document.getElementById('modal');
+    const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ', confirm: '?' };
+    document.getElementById('modal-icon').textContent = icons[type] || icons.info;
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-message').textContent = message;
+    const buttonsEl = document.getElementById('modal-buttons');
+    buttonsEl.innerHTML = '';
+    buttons.forEach(btn => {
+      const button = document.createElement('button');
+      button.className = 'modal-btn ' + (btn.className || 'modal-btn-secondary');
+      button.textContent = btn.text;
+      button.onclick = () => {
+        btn.action();
+        modal.classList.remove('active');
+      };
+      buttonsEl.appendChild(button);
+    });
+    modal.className = 'modal-overlay active modal-' + type;
+    modal.onclick = event => {
+      if (event.target === modal) modal.classList.remove('active');
+    };
+  }
+
+  function showAlert(title, message, type = 'info') {
+    showModal(title, message, type, [{ text: 'OK', className: 'modal-btn-primary', action: () => {} }]);
+  }
+
+  function showConfirm(title, message, onConfirm) {
+    showModal(title, message, 'confirm', [
+      { text: 'Cancelar', className: 'modal-btn-secondary', action: () => {} },
+      { text: 'Confirmar', className: 'modal-btn-danger', action: onConfirm }
+    ]);
+  }
+
+  function dinheiro(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  function renderizarAtendimentos(atendimentos) {
+    tbody.innerHTML = '';
+    if (!atendimentos.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Atendimento não encontrado</td></tr>';
+      return;
+    }
+
+    atendimentos.forEach(atendimento => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${atendimento.idAtendimento || '-'}</td>
+        <td>${atendimento.data || '-'}</td>
+        <td>${atendimento.tipoAtendimento || '-'}</td>
+        <td>${atendimento.fk_CPF_Paciente || '-'}</td>
+        <td>${dinheiro(atendimento.valorTotal)}</td>
+        <td>${atendimento.parcelas || '-'}</td>
+        <td>
+          <button class="edit" data-id="${atendimento.idAtendimento}">Editar</button>
+          <button class="delete" data-id="${atendimento.idAtendimento}">Excluir</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+      tr.querySelector('.edit').addEventListener('click', () => editarAtendimento(atendimento));
+      tr.querySelector('.delete').addEventListener('click', () => excluirAtendimento(atendimento.idAtendimento));
+    });
+  }
+
+  async function carregarAtendimentos() {
+    try {
+      const resposta = await fetch(API_URL);
+      atendimentosCache = await resposta.json();
+      renderizarAtendimentos(atendimentosCache);
+    } catch (erro) {
+      console.error('Erro ao carregar atendimentos:', erro);
+      renderizarAtendimentos([]);
+      showAlert('Erro', 'Erro ao carregar atendimentos. Verifique se a rota /atendimentos está ativa.', 'error');
+    }
+  }
+
+  function editarAtendimento(atendimento) {
+    idEmEdicao = atendimento.idAtendimento;
+    document.getElementById('data').value = atendimento.data || '';
+    document.getElementById('tipoAtendimento').value = atendimento.tipoAtendimento || '';
+    document.getElementById('cpf-paciente').value = atendimento.fk_CPF_Paciente || '';
+    document.getElementById('cpf-secretaria').value = atendimento.fk_CPF_Secretaria || '';
+    document.getElementById('valor-total').value = atendimento.valorTotal || '';
+    document.getElementById('parcelas').value = atendimento.parcelas || '';
+    document.getElementById('observacao').value = atendimento.observacao || '';
+    document.getElementById('id-procedimento').value = atendimento.fk_idProcedimento || '';
+    document.getElementById('cpf-dentista').value = atendimento.CPF_Dentista || '';
+    document.getElementById('qtd').value = atendimento.qtd || '';
+    document.getElementById('valor-unit').value = atendimento.valorUnit || '';
+    document.getElementById('desconto-item').value = atendimento.descontoItem || '';
+    document.getElementById('comissao-dentista').value = atendimento.comissaoDentista || '';
+    document.querySelector('.save').textContent = 'Atualizar';
+    document.querySelectorAll('.tabs button')[0].classList.remove('active');
+    document.querySelectorAll('.tabs button')[1].classList.add('active');
+    document.querySelector('.form-box').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function excluirAtendimento(id) {
+    showConfirm('Excluir Atendimento', 'Tem certeza que deseja excluir este atendimento?', async () => {
+      try {
+        const resposta = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        const resultado = await resposta.json();
+        if (resposta.ok) {
+          showAlert('Sucesso!', resultado.mensagem || 'Atendimento excluído com sucesso.', 'success');
+          carregarAtendimentos();
+        } else {
+          showAlert('Aviso', resultado.erro || 'Não foi possível excluir o atendimento.', 'warning');
+        }
+      } catch (erro) {
+        console.error(erro);
+        showAlert('Erro', 'Erro ao excluir atendimento.', 'error');
+      }
+    });
+  }
+
+  formAtendimento.addEventListener('submit', async evento => {
+    evento.preventDefault();
+    const dados = {
+      data: document.getElementById('data').value,
+      tipoAtendimento: document.getElementById('tipoAtendimento').value,
+      fk_CPF_Paciente: document.getElementById('cpf-paciente').value.trim(),
+      fk_CPF_Secretaria: document.getElementById('cpf-secretaria').value.trim(),
+      valorTotal: document.getElementById('valor-total').value,
+      parcelas: document.getElementById('parcelas').value || null,
+      observacao: document.getElementById('observacao').value.trim() || null,
+      item: {
+        fk_idProcedimento: document.getElementById('id-procedimento').value || null,
+        CPF_Dentista: document.getElementById('cpf-dentista').value.trim() || null,
+        qtd: document.getElementById('qtd').value || null,
+        valorUnit: document.getElementById('valor-unit').value || null,
+        descontoItem: document.getElementById('desconto-item').value || 0,
+        comissaoDentista: document.getElementById('comissao-dentista').value || null
+      }
+    };
+
+    if (!dados.data || !dados.tipoAtendimento || !dados.fk_CPF_Paciente || !dados.fk_CPF_Secretaria || !dados.valorTotal) {
+      showAlert('Aviso', 'Preencha data, tipo, paciente, secretária e valor total.', 'warning');
+      return;
+    }
+
+    try {
+      const resposta = await fetch(idEmEdicao ? `${API_URL}/${idEmEdicao}` : API_URL, {
+        method: idEmEdicao ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+      const resultado = await resposta.json();
+      if (resposta.ok) {
+        showAlert('Sucesso!', resultado.mensagem || 'Atendimento salvo com sucesso.', 'success');
+        limparFormulario();
+        carregarAtendimentos();
+      } else {
+        showAlert('Aviso', resultado.erro || 'Não foi possível salvar o atendimento.', 'warning');
+      }
+    } catch (erro) {
+      console.error(erro);
+      showAlert('Erro', 'O backend não respondeu.', 'error');
+    }
+  });
+
+  function limparFormulario() {
+    formAtendimento.reset();
+    idEmEdicao = null;
+    document.querySelector('.save').textContent = 'Salvar';
+    document.querySelectorAll('.tabs button')[0].classList.add('active');
+    document.querySelectorAll('.tabs button')[1].classList.remove('active');
+  }
+
+  document.querySelectorAll('.tabs button')[0].addEventListener('click', limparFormulario);
+
+  document.getElementById('busca-btn').addEventListener('click', () => {
+    const termo = document.getElementById('busca-input').value.trim().toLowerCase();
+    if (!termo) {
+      showAlert('Campo vazio', 'Digite algo para buscar.', 'warning');
+      return;
+    }
+    const encontrados = atendimentosCache.filter(atendimento =>
+      String(atendimento.idAtendimento || '').includes(termo) ||
+      (atendimento.data || '').includes(termo) ||
+      (atendimento.tipoAtendimento || '').toLowerCase().includes(termo) ||
+      (atendimento.fk_CPF_Paciente || '').includes(termo)
+    );
+    renderizarAtendimentos(encontrados);
+  });
+
+  document.getElementById('busca-input').addEventListener('keypress', event => {
+    if (event.key === 'Enter') document.getElementById('busca-btn').click();
+  });
+
+  const botaoLimparBusca = document.createElement('button');
+  botaoLimparBusca.textContent = 'Limpar Busca';
+  botaoLimparBusca.style.marginLeft = '10px';
+  botaoLimparBusca.addEventListener('click', () => {
+    document.getElementById('busca-input').value = '';
+    renderizarAtendimentos(atendimentosCache);
+  });
+  document.querySelector('.search-bar').appendChild(botaoLimparBusca);
+
+  function irParaInicio() {
+    window.location.href = '../../Tela/index.html';
+  }
+
+  function sair() {
+    showConfirm('Sair do Sistema', 'Tem certeza que deseja sair?', () => {
+      window.location.href = '../../Tela/index.html';
+    });
+  }
+
+  carregarAtendimentos();
+</script>
+</body>
+</html>

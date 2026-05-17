@@ -92,8 +92,9 @@ function navigate(page) {
       break;
 
     case "atendimentos":
-      showAlert('Em Desenvolvimento', '🚧 Gestão de Atendimentos em desenvolvimento', 'warning');
-      cards.forEach(card => card.style.opacity = '1');
+      setTimeout(() => {
+        window.location.href = "../atendimento/Atendimento/index.html";
+      }, 200);
       break;
 
     case "pagamentos":
@@ -102,13 +103,15 @@ function navigate(page) {
       break;
 
     case "comissao":
-      showAlert('Em Desenvolvimento', '🚧 Gestão de Comissão em desenvolvimento', 'warning');
-      cards.forEach(card => card.style.opacity = '1');
+      setTimeout(() => {
+        window.location.href = "../comissao/Comissao/index.html";
+      }, 200);
       break;
 
     case "procedimentos":
-      showAlert('Em Desenvolvimento', '🚧 Gestão de Procedimentos em desenvolvimento', 'warning');
-      cards.forEach(card => card.style.opacity = '1');
+      setTimeout(() => {
+        window.location.href = "../procedimento/Procedimento/index.html";
+      }, 200);
       break;
 
     default:
