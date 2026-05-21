@@ -5,11 +5,9 @@ import mysql from 'mysql2/promise';
 
 const app = express();
 
-// Configurações (Middlewares)
 app.use(cors());
 app.use(express.json());
 
-// Configuração da Conexão com o Banco de Dados
 let db;
 
 try {
@@ -49,14 +47,22 @@ function validarDadosDentista({ CPF_Dentista, nome, CRO, croUF, especialidade })
     return null;
 }
 
+async function rollbackQuietly() {
+    try {
+        await db.rollback();
+    } catch {
+        // Ignora rollback sem transação ativa.
+    }
+}
+
 // ==========================================
-// ROTAS DO MÓDULO DE DENTISTAS
+// ROTAS DO MODULO DE DENTISTAS
 // ==========================================
 
 // 1. Rota para CADASTRAR um dentista (CREATE)
 app.post('/dentistas', async (req, res) => {
     try {
-        const { CPF_Dentista, nome, CRO, croUF, especialidade } = req.body;
+        const { CPF_Dentista, nome, CRO, croUF, especialidade, telefone } = req.body;
         const erroValidacao = validarDadosDentista({ CPF_Dentista, nome, CRO, croUF, especialidade });
 
         if (erroValidacao) {
@@ -67,14 +73,26 @@ app.post('/dentistas', async (req, res) => {
         const croUFFormatado = croUF.toUpperCase();
         const especialidadeFormatada = especialidade.toUpperCase();
 
+        await db.beginTransaction();
+
         const query = 'INSERT INTO dentista (CPF_Dentista, nome, CRO, croUF, especialidade) VALUES (?, ?, ?, ?, ?)';
         await db.execute(query, [CPF_Dentista, nome, croFormatado, croUFFormatado, especialidadeFormatada]);
 
-        res.status(201).json({ 
+        if (telefone) {
+            await db.execute(
+                'INSERT INTO telefone_dentista (telefone, CPF_Dentista) VALUES (?, ?)',
+                [telefone, CPF_Dentista]
+            );
+        }
+
+        await db.commit();
+
+        res.status(201).json({
             mensagem: 'Dentista cadastrado com sucesso!',
             CPF_Cadastrado: CPF_Dentista
         });
     } catch (err) {
+        await rollbackQuietly();
         console.error('Erro ao cadastrar dentista:', err);
         if (err.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({ erro: 'CPF ou CRO já cadastrados no sistema.' });
@@ -86,7 +104,11 @@ app.post('/dentistas', async (req, res) => {
 // 2. Rota para LISTAR todos os dentistas (READ)
 app.get('/dentistas', async (req, res) => {
     try {
-        const query = 'SELECT * FROM dentista';
+        const query = `
+            SELECT d.*, t.telefone
+            FROM dentista d
+            LEFT JOIN telefone_dentista t ON d.CPF_Dentista = t.CPF_Dentista
+        `;
         const [results] = await db.execute(query);
         res.status(200).json(results);
     } catch (err) {
@@ -95,11 +117,16 @@ app.get('/dentistas', async (req, res) => {
     }
 });
 
-// 2.1. Rota para BUSCAR um dentista específico por CPF (READ ONE)
+// 2.1. Rota para BUSCAR um dentista especifico por CPF (READ ONE)
 app.get('/dentistas/:cpf', async (req, res) => {
     try {
         const { cpf } = req.params;
-        const query = 'SELECT * FROM dentista WHERE CPF_Dentista = ?';
+        const query = `
+            SELECT d.*, t.telefone
+            FROM dentista d
+            LEFT JOIN telefone_dentista t ON d.CPF_Dentista = t.CPF_Dentista
+            WHERE d.CPF_Dentista = ?
+        `;
         const [results] = await db.execute(query, [cpf]);
 
         if (results.length === 0) {
@@ -117,7 +144,7 @@ app.get('/dentistas/:cpf', async (req, res) => {
 app.put('/dentistas/:cpf', async (req, res) => {
     try {
         const { cpf } = req.params;
-        const { nome, CRO, croUF, especialidade } = req.body;
+        const { nome, CRO, croUF, especialidade, telefone } = req.body;
         const erroValidacao = validarDadosDentista({ CPF_Dentista: cpf, nome, CRO, croUF, especialidade });
 
         if (erroValidacao) {
@@ -128,15 +155,30 @@ app.put('/dentistas/:cpf', async (req, res) => {
         const croUFFormatado = croUF.toUpperCase();
         const especialidadeFormatada = especialidade.toUpperCase();
 
+        await db.beginTransaction();
+
         const query = 'UPDATE dentista SET nome = ?, CRO = ?, croUF = ?, especialidade = ? WHERE CPF_Dentista = ?';
         const [result] = await db.execute(query, [nome, croFormatado, croUFFormatado, especialidadeFormatada, cpf]);
 
         if (result.affectedRows === 0) {
+            await rollbackQuietly();
             return res.status(404).json({ erro: 'Dentista não encontrado com o CPF informado.' });
         }
 
+        await db.execute('DELETE FROM telefone_dentista WHERE CPF_Dentista = ?', [cpf]);
+
+        if (telefone) {
+            await db.execute(
+                'INSERT INTO telefone_dentista (telefone, CPF_Dentista) VALUES (?, ?)',
+                [telefone, cpf]
+            );
+        }
+
+        await db.commit();
+
         res.status(200).json({ mensagem: 'Dados do dentista atualizados com sucesso!' });
     } catch (err) {
+        await rollbackQuietly();
         console.error('Erro ao atualizar dentista:', err);
         if (err.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({ erro: 'O novo CRO informado já está cadastrado no sistema.' });
@@ -149,23 +191,31 @@ app.put('/dentistas/:cpf', async (req, res) => {
 app.delete('/dentistas/:cpf', async (req, res) => {
     try {
         const { cpf } = req.params;
+        await db.beginTransaction();
+
+        await db.execute('DELETE FROM telefone_dentista WHERE CPF_Dentista = ?', [cpf]);
+
         const query = 'DELETE FROM dentista WHERE CPF_Dentista = ?';
         const [result] = await db.execute(query, [cpf]);
 
         if (result.affectedRows === 0) {
+            await rollbackQuietly();
             return res.status(404).json({ erro: 'Dentista não encontrado com o CPF informado.' });
         }
 
+        await db.commit();
+
         res.status(200).json({ mensagem: 'Dentista excluído com sucesso!' });
     } catch (err) {
+        await rollbackQuietly();
         console.error('Erro ao excluir dentista:', err);
-        
+
         if (err.code === 'ER_ROW_IS_REFERENCED_2') {
-            return res.status(400).json({ 
-                erro: 'Não é possível excluir este dentista, pois ele já possui atendimentos ou procedimentos vinculados no sistema.' 
+            return res.status(400).json({
+                erro: 'Não é possível excluir este dentista, pois ele já possui atendimentos ou procedimentos vinculados no sistema.'
             });
         }
-        
+
         return res.status(500).json({ erro: 'Erro interno ao excluir no banco de dados' });
     }
 });

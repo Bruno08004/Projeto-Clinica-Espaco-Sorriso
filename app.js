@@ -3,7 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 
 // Rotas
-import pacienteRoutes from "./paciente/paciente.routes.js";
+import pacienteRoutes from "./backend/paciente/paciente.routes.js";
 
 const app = express();
 
