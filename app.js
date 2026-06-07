@@ -4,6 +4,7 @@ import "dotenv/config";
 
 // Rotas
 import pacienteRoutes from "./backend/paciente/paciente.routes.js";
+import procedimentoRoutes from "./backend/procedimento/procedimento.routes.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 
 // Rotas da aplicação
 app.use("/pacientes", pacienteRoutes);
+app.use("/procedimentos", procedimentoRoutes);
 
 // Rotas de dentistas (endpoint base)
 app.get("/dentistas", async (req, res) => {
