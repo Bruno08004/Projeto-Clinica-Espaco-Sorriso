@@ -9,26 +9,26 @@
 <body>
 <header class="topbar">
   <div class="logo">
-    <img src="../../assests/logo.png" alt="Espaço Sorriso">
+    <img src="../../assests/logo.png" alt="Espaco Sorriso">
   </div>
-  <h1>Espaço Sorriso - Sistema de Gestão</h1>
+  <h1>Espaco Sorriso - Sistema de Gestao</h1>
   <nav>
-    <a href="javascript:irParaInicio()">Início</a>
-    <a href="#">Relatórios</a>
-    <a href="#">Configurações</a>
+    <a href="javascript:irParaInicio()">Inicio</a>
+    <a href="#">Relatorios</a>
+    <a href="#">Configuracoes</a>
     <a href="javascript:sair()">Sair</a>
   </nav>
-  <div class="profile">👤</div>
+  <div class="profile">Usuario</div>
 </header>
 
 <main class="container">
   <div class="title">
     <h2>Gerenciamento de Atendimentos</h2>
-    <p>Registre consultas, valores, paciente responsável e dados do item executado.</p>
+    <p>Registre atendimentos com um ou mais procedimentos realizados.</p>
   </div>
 
   <div class="search-bar">
-    <input id="busca-input" type="text" placeholder="Buscar por ID, CPF do paciente, tipo ou data...">
+    <input id="busca-input" type="text" placeholder="Buscar por ID, paciente, tipo, data ou procedimento...">
     <button id="busca-btn">Pesquisar</button>
   </div>
 
@@ -43,7 +43,7 @@
             <th>Paciente</th>
             <th>Valor Total</th>
             <th>Parcelas</th>
-            <th>Ações</th>
+            <th>Acoes</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -57,24 +57,54 @@
       </div>
 
       <form id="form-atendimento">
+        <label for="data">Data*</label>
         <input id="data" type="date" placeholder="Data*">
+
+        <label for="tipoAtendimento">Tipo do atendimento*</label>
         <select id="tipoAtendimento">
           <option value="">Selecione o tipo*</option>
-          <option value="CLÍNICO">CLÍNICO</option>
-          <option value="ORTODÔNTICO">ORTODÔNTICO</option>
+          <option value="CLÍNICO">CLINICO</option>
+          <option value="ORTODÔNTICO">ORTODONTICO</option>
         </select>
-        <input id="cpf-paciente" placeholder="CPF do paciente*">
-        <input id="cpf-secretaria" placeholder="CPF da secretária*">
-        <input id="valor-total" type="number" min="0" step="0.01" placeholder="Valor total*">
-        <input id="parcelas" type="number" min="1" placeholder="Parcelas">
-        <textarea id="observacao" placeholder="Observação"></textarea>
 
-        <input id="id-procedimento" type="number" min="1" placeholder="ID do procedimento executado">
-        <input id="cpf-dentista" placeholder="CPF do dentista">
-        <input id="qtd" type="number" min="1" placeholder="Quantidade">
-        <input id="valor-unit" type="number" min="0" step="0.01" placeholder="Valor unitário">
-        <input id="desconto-item" type="number" min="0" step="0.01" placeholder="Desconto do item">
-        <input id="comissao-dentista" type="number" min="0" step="0.01" placeholder="Comissão do dentista">
+        <label for="cpf-paciente">CPF do paciente*</label>
+        <input id="cpf-paciente" placeholder="CPF do paciente*">
+
+        <label for="cpf-secretaria">CPF da secretaria*</label>
+        <input id="cpf-secretaria" placeholder="CPF da secretaria*">
+
+        <label for="valor-total">Valor total*</label>
+        <input id="valor-total" type="number" min="0" step="0.01" placeholder="Valor total*">
+
+        <label for="parcelas">Parcelas</label>
+        <input id="parcelas" type="number" min="1" placeholder="Parcelas">
+
+        <label for="observacao">Observacao</label>
+        <textarea id="observacao" placeholder="Observacao"></textarea>
+
+        <div class="itens-box">
+          <div class="itens-title">Procedimentos do atendimento</div>
+
+          <label for="id-procedimento">Procedimento</label>
+          <select id="id-procedimento">
+            <option value="">Selecione o procedimento</option>
+          </select>
+
+          <label for="cpf-dentista">CPF do dentista</label>
+          <input id="cpf-dentista" placeholder="CPF do dentista">
+
+          <label for="qtd">Quantidade</label>
+          <input id="qtd" type="number" min="1" placeholder="Quantidade">
+
+          <label for="valor-unit">Valor unitario</label>
+          <input id="valor-unit" type="number" min="0" step="0.01" placeholder="Valor unitario">
+
+          <label for="desconto-item">Desconto do item</label>
+          <input id="desconto-item" type="number" min="0" step="0.01" placeholder="Desconto do item">
+
+          <button id="adicionar-item" type="button" class="btn-item">Adicionar procedimento</button>
+          <div class="itens-lista" id="itens-lista"></div>
+        </div>
 
         <button type="submit" class="save">Salvar</button>
       </form>
@@ -97,14 +127,17 @@
 
 <script>
   const API_URL = 'http://localhost:3000/atendimentos';
+  const PROCEDIMENTOS_URL = 'http://localhost:3000/procedimentos';
   const tbody = document.querySelector('table tbody');
   const formAtendimento = document.getElementById('form-atendimento');
   let idEmEdicao = null;
   let atendimentosCache = [];
+  let procedimentosCache = [];
+  let itensAtendimento = [];
 
   function showModal(title, message, type = 'info', buttons = []) {
     const modal = document.getElementById('modal');
-    const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ', confirm: '?' };
+    const icons = { success: 'OK', error: 'X', warning: '!', info: 'i', confirm: '?' };
     document.getElementById('modal-icon').textContent = icons[type] || icons.info;
     document.getElementById('modal-title').textContent = title;
     document.getElementById('modal-message').textContent = message;
@@ -141,28 +174,130 @@
     return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
+  function formatarData(data) {
+    return data ? String(data).slice(0, 10) : '';
+  }
+
+  function calcularValorItem(item) {
+    return Number(item.qtd || 0) * Number(item.valorUnit || 0) - Number(item.descontoItem || 0);
+  }
+
+  function atualizarValorTotal() {
+    if (!itensAtendimento.length) return;
+    const total = itensAtendimento.reduce((soma, item) => soma + calcularValorItem(item), 0);
+    document.getElementById('valor-total').value = total.toFixed(2);
+  }
+
+  function renderizarProcedimentosSelect() {
+    const select = document.getElementById('id-procedimento');
+    select.innerHTML = '<option value="">Selecione o procedimento</option>';
+    procedimentosCache.forEach(procedimento => {
+      const option = document.createElement('option');
+      option.value = procedimento.idProcedimento;
+      option.textContent = `${procedimento.nome} - ${procedimento.tipoProcedimento}`;
+      select.appendChild(option);
+    });
+  }
+
+  function renderizarItens() {
+    const lista = document.getElementById('itens-lista');
+    if (!itensAtendimento.length) {
+      lista.innerHTML = '<div class="item-empty">Nenhum procedimento adicionado.</div>';
+      return;
+    }
+
+    lista.innerHTML = itensAtendimento.map((item, index) => `
+      <div class="item-row">
+        <div>
+          <strong>${item.nomeProcedimento || item.fk_idProcedimento}</strong>
+          <span>${item.qtd} x ${dinheiro(item.valorUnit)} | Desc. ${dinheiro(item.descontoItem)}</span>
+          <span>Dentista: ${item.CPF_Dentista}</span>
+        </div>
+        <button type="button" class="delete item-remove" data-index="${index}">Remover</button>
+      </div>
+    `).join('');
+
+    lista.querySelectorAll('.item-remove').forEach(button => {
+      button.addEventListener('click', () => {
+        itensAtendimento.splice(Number(button.dataset.index), 1);
+        renderizarItens();
+        atualizarValorTotal();
+      });
+    });
+  }
+
+  function limparCamposItem() {
+    document.getElementById('id-procedimento').value = '';
+    document.getElementById('cpf-dentista').value = '';
+    document.getElementById('qtd').value = '';
+    document.getElementById('valor-unit').value = '';
+    document.getElementById('desconto-item').value = '';
+  }
+
+  function adicionarItem() {
+    const idProcedimento = document.getElementById('id-procedimento').value;
+    const procedimento = procedimentosCache.find(item => String(item.idProcedimento) === String(idProcedimento));
+    const CPF_Dentista = document.getElementById('cpf-dentista').value.trim();
+    const qtd = Number(document.getElementById('qtd').value);
+    const valorUnit = Number(document.getElementById('valor-unit').value);
+    const descontoItem = Number(document.getElementById('desconto-item').value || 0);
+
+    if (!procedimento || !CPF_Dentista || !qtd || !valorUnit) {
+      showAlert('Aviso', 'Selecione procedimento, dentista, quantidade e valor unitario.', 'warning');
+      return;
+    }
+
+    if (itensAtendimento.some(item => String(item.fk_idProcedimento) === String(idProcedimento))) {
+      showAlert('Aviso', 'Este procedimento ja foi adicionado ao atendimento.', 'warning');
+      return;
+    }
+
+    if (descontoItem > qtd * valorUnit) {
+      showAlert('Aviso', 'Desconto nao pode ser maior que o valor do item.', 'warning');
+      return;
+    }
+
+    itensAtendimento.push({
+      fk_idProcedimento: Number(idProcedimento),
+      nomeProcedimento: procedimento.nome,
+      tipoProcedimento: procedimento.tipoProcedimento,
+      CPF_Dentista,
+      qtd,
+      valorUnit,
+      descontoItem
+    });
+
+    limparCamposItem();
+    renderizarItens();
+    atualizarValorTotal();
+  }
+
   function renderizarAtendimentos(atendimentos) {
     tbody.innerHTML = '';
     if (!atendimentos.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Atendimento não encontrado</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Atendimento nao encontrado</td></tr>';
       return;
     }
 
     atendimentos.forEach(atendimento => {
+      const totalProcedimentos = atendimento.itens?.length || 0;
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${atendimento.idAtendimento || '-'}</td>
-        <td>${atendimento.data || '-'}</td>
+        <td>${formatarData(atendimento.data) || '-'}</td>
         <td>${atendimento.tipoAtendimento || '-'}</td>
-        <td>${atendimento.fk_CPF_Paciente || '-'}</td>
+        <td>${atendimento.paciente_nome || atendimento.fk_CPF_Paciente || '-'}</td>
         <td>${dinheiro(atendimento.valorTotal)}</td>
         <td>${atendimento.parcelas || '-'}</td>
         <td>
+          <button class="view" data-id="${atendimento.idAtendimento}">Ver</button>
           <button class="edit" data-id="${atendimento.idAtendimento}">Editar</button>
           <button class="delete" data-id="${atendimento.idAtendimento}">Excluir</button>
+          <div class="item-count">${totalProcedimentos} procedimento(s)</div>
         </td>
       `;
       tbody.appendChild(tr);
+      tr.querySelector('.view').addEventListener('click', () => visualizarAtendimento(atendimento));
       tr.querySelector('.edit').addEventListener('click', () => editarAtendimento(atendimento));
       tr.querySelector('.delete').addEventListener('click', () => excluirAtendimento(atendimento.idAtendimento));
     });
@@ -171,34 +306,87 @@
   async function carregarAtendimentos() {
     try {
       const resposta = await fetch(API_URL);
-      atendimentosCache = await resposta.json();
+      const resultado = await resposta.json();
+      if (!resposta.ok) throw new Error(resultado.erro || resultado.error || 'Erro ao carregar atendimentos.');
+      atendimentosCache = Array.isArray(resultado) ? resultado : [];
       renderizarAtendimentos(atendimentosCache);
     } catch (erro) {
       console.error('Erro ao carregar atendimentos:', erro);
       renderizarAtendimentos([]);
-      showAlert('Erro', 'Erro ao carregar atendimentos. Verifique se a rota /atendimentos está ativa.', 'error');
+      showAlert('Erro', erro.message || 'Erro ao carregar atendimentos.', 'error');
+    }
+  }
+
+  async function carregarProcedimentos() {
+    try {
+      const resposta = await fetch(PROCEDIMENTOS_URL);
+      const resultado = await resposta.json();
+      if (!resposta.ok) throw new Error(resultado.erro || resultado.error || 'Erro ao carregar procedimentos.');
+      procedimentosCache = Array.isArray(resultado) ? resultado : [];
+      renderizarProcedimentosSelect();
+    } catch (erro) {
+      console.error('Erro ao carregar procedimentos:', erro);
+      showAlert('Erro', erro.message || 'Erro ao carregar procedimentos.', 'error');
     }
   }
 
   function editarAtendimento(atendimento) {
     idEmEdicao = atendimento.idAtendimento;
-    document.getElementById('data').value = atendimento.data || '';
+    document.getElementById('data').value = formatarData(atendimento.data);
     document.getElementById('tipoAtendimento').value = atendimento.tipoAtendimento || '';
     document.getElementById('cpf-paciente').value = atendimento.fk_CPF_Paciente || '';
     document.getElementById('cpf-secretaria').value = atendimento.fk_CPF_Secretaria || '';
     document.getElementById('valor-total').value = atendimento.valorTotal || '';
     document.getElementById('parcelas').value = atendimento.parcelas || '';
     document.getElementById('observacao').value = atendimento.observacao || '';
-    document.getElementById('id-procedimento').value = atendimento.fk_idProcedimento || '';
-    document.getElementById('cpf-dentista').value = atendimento.CPF_Dentista || '';
-    document.getElementById('qtd').value = atendimento.qtd || '';
-    document.getElementById('valor-unit').value = atendimento.valorUnit || '';
-    document.getElementById('desconto-item').value = atendimento.descontoItem || '';
-    document.getElementById('comissao-dentista').value = atendimento.comissaoDentista || '';
+    itensAtendimento = (atendimento.itens || []).map(item => ({
+      fk_idProcedimento: item.fk_idProcedimento,
+      nomeProcedimento: item.nomeProcedimento || item.procedimento_nome,
+      tipoProcedimento: item.tipoProcedimento,
+      CPF_Dentista: item.CPF_Dentista,
+      qtd: Number(item.qtd || 1),
+      valorUnit: Number(item.valorUnit || 0),
+      descontoItem: Number(item.descontoItem || 0)
+    }));
+    renderizarItens();
     document.querySelector('.save').textContent = 'Atualizar';
     document.querySelectorAll('.tabs button')[0].classList.remove('active');
     document.querySelectorAll('.tabs button')[1].classList.add('active');
     document.querySelector('.form-box').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function visualizarAtendimento(atendimento) {
+    const itens = atendimento.itens || [];
+    const itensHtml = itens.length
+      ? itens.map(item => `
+          <div class="details-item">
+            <strong>${item.nomeProcedimento || item.procedimento_nome || item.fk_idProcedimento}</strong>
+            <span>Dentista: ${item.nomeDentista || item.dentista_nome || item.CPF_Dentista || '-'}</span>
+            <span>Qtd: ${item.qtd || '-'} | Valor: ${dinheiro(item.valorUnit)} | Desconto: ${dinheiro(item.descontoItem)}</span>
+          </div>
+        `).join('')
+      : '<div class="details-empty">Nenhum procedimento vinculado.</div>';
+
+    showModal(
+      `Atendimento ${atendimento.idAtendimento}`,
+      '',
+      'info',
+      [{ text: 'Fechar', className: 'modal-btn-primary', action: () => {} }]
+    );
+
+    document.getElementById('modal-message').innerHTML = `
+      <div class="details-box">
+        <div><strong>Data:</strong> ${formatarData(atendimento.data) || '-'}</div>
+        <div><strong>Tipo:</strong> ${atendimento.tipoAtendimento || '-'}</div>
+        <div><strong>Paciente:</strong> ${atendimento.paciente_nome || atendimento.fk_CPF_Paciente || '-'}</div>
+        <div><strong>Secretaria:</strong> ${atendimento.secretaria_nome || atendimento.fk_CPF_Secretaria || '-'}</div>
+        <div><strong>Valor total:</strong> ${dinheiro(atendimento.valorTotal)}</div>
+        <div><strong>Parcelas:</strong> ${atendimento.parcelas || '-'}</div>
+        <div><strong>Observacao:</strong> ${atendimento.observacao || '-'}</div>
+        <div class="details-title">Procedimentos</div>
+        ${itensHtml}
+      </div>
+    `;
   }
 
   async function excluirAtendimento(id) {
@@ -207,10 +395,10 @@
         const resposta = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         const resultado = await resposta.json();
         if (resposta.ok) {
-          showAlert('Sucesso!', resultado.mensagem || 'Atendimento excluído com sucesso.', 'success');
+          showAlert('Sucesso!', resultado.mensagem || resultado.message || 'Atendimento excluido com sucesso.', 'success');
           carregarAtendimentos();
         } else {
-          showAlert('Aviso', resultado.erro || 'Não foi possível excluir o atendimento.', 'warning');
+          showAlert('Aviso', resultado.erro || resultado.error || 'Nao foi possivel excluir o atendimento.', 'warning');
         }
       } catch (erro) {
         console.error(erro);
@@ -229,18 +417,22 @@
       valorTotal: document.getElementById('valor-total').value,
       parcelas: document.getElementById('parcelas').value || null,
       observacao: document.getElementById('observacao').value.trim() || null,
-      item: {
-        fk_idProcedimento: document.getElementById('id-procedimento').value || null,
-        CPF_Dentista: document.getElementById('cpf-dentista').value.trim() || null,
-        qtd: document.getElementById('qtd').value || null,
-        valorUnit: document.getElementById('valor-unit').value || null,
-        descontoItem: document.getElementById('desconto-item').value || 0,
-        comissaoDentista: document.getElementById('comissao-dentista').value || null
-      }
+      itens: itensAtendimento.map(item => ({
+        fk_idProcedimento: item.fk_idProcedimento,
+        CPF_Dentista: item.CPF_Dentista,
+        qtd: item.qtd,
+        valorUnit: item.valorUnit,
+        descontoItem: item.descontoItem
+      }))
     };
 
     if (!dados.data || !dados.tipoAtendimento || !dados.fk_CPF_Paciente || !dados.fk_CPF_Secretaria || !dados.valorTotal) {
-      showAlert('Aviso', 'Preencha data, tipo, paciente, secretária e valor total.', 'warning');
+      showAlert('Aviso', 'Preencha data, tipo, paciente, secretaria e valor total.', 'warning');
+      return;
+    }
+
+    if (!dados.itens.length) {
+      showAlert('Aviso', 'Adicione pelo menos um procedimento ao atendimento.', 'warning');
       return;
     }
 
@@ -252,27 +444,31 @@
       });
       const resultado = await resposta.json();
       if (resposta.ok) {
-        showAlert('Sucesso!', resultado.mensagem || 'Atendimento salvo com sucesso.', 'success');
+        showAlert('Sucesso!', resultado.mensagem || resultado.message || 'Atendimento salvo com sucesso.', 'success');
         limparFormulario();
         carregarAtendimentos();
       } else {
-        showAlert('Aviso', resultado.erro || 'Não foi possível salvar o atendimento.', 'warning');
+        showAlert('Aviso', resultado.erro || resultado.error || 'Nao foi possivel salvar o atendimento.', 'warning');
       }
     } catch (erro) {
       console.error(erro);
-      showAlert('Erro', 'O backend não respondeu.', 'error');
+      showAlert('Erro', 'O backend nao respondeu.', 'error');
     }
   });
 
   function limparFormulario() {
     formAtendimento.reset();
     idEmEdicao = null;
+    itensAtendimento = [];
+    limparCamposItem();
+    renderizarItens();
     document.querySelector('.save').textContent = 'Salvar';
     document.querySelectorAll('.tabs button')[0].classList.add('active');
     document.querySelectorAll('.tabs button')[1].classList.remove('active');
   }
 
   document.querySelectorAll('.tabs button')[0].addEventListener('click', limparFormulario);
+  document.getElementById('adicionar-item').addEventListener('click', adicionarItem);
 
   document.getElementById('busca-btn').addEventListener('click', () => {
     const termo = document.getElementById('busca-input').value.trim().toLowerCase();
@@ -282,9 +478,11 @@
     }
     const encontrados = atendimentosCache.filter(atendimento =>
       String(atendimento.idAtendimento || '').includes(termo) ||
-      (atendimento.data || '').includes(termo) ||
+      formatarData(atendimento.data).includes(termo) ||
       (atendimento.tipoAtendimento || '').toLowerCase().includes(termo) ||
-      (atendimento.fk_CPF_Paciente || '').includes(termo)
+      (atendimento.fk_CPF_Paciente || '').includes(termo) ||
+      (atendimento.paciente_nome || '').toLowerCase().includes(termo) ||
+      (atendimento.itens || []).some(item => (item.nomeProcedimento || item.procedimento_nome || '').toLowerCase().includes(termo))
     );
     renderizarAtendimentos(encontrados);
   });
@@ -312,6 +510,8 @@
     });
   }
 
+  renderizarItens();
+  carregarProcedimentos();
   carregarAtendimentos();
 </script>
 </body>

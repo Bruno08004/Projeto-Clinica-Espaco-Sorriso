@@ -13,22 +13,60 @@ function normalizarAtendimento(dados) {
 }
 
 function normalizarItemAtendimento(dados, idAtendimento, valorTotal) {
-    const fk_idProcedimento = dados.fk_idProcedimento ?? dados.idProcedimento ?? dados.id_procedimento;
-    const CPF_Dentista = dados.CPF_Dentista ?? dados.cpf_dentista ?? dados.id_dentista;
+    const origem = dados.item ?? dados;
+    const fk_idProcedimento = origem.fk_idProcedimento ?? origem.idProcedimento ?? origem.id_procedimento;
+    const CPF_Dentista = origem.CPF_Dentista ?? origem.cpf_dentista ?? origem.id_dentista;
 
     if (!fk_idProcedimento && !CPF_Dentista) {
         return null;
     }
 
     return {
-        qtd: dados.qtd ?? dados.quantidade ?? 1,
-        valorUnit: dados.valorUnit ?? dados.valor_unitario ?? valorTotal,
-        descontoItem: dados.descontoItem ?? dados.desconto_item ?? 0,
-        comissaoDentista: dados.comissaoDentista ?? dados.comissao_dentista ?? 0,
+        qtd: origem.qtd ?? origem.quantidade ?? 1,
+        valorUnit: origem.valorUnit ?? origem.valor_unitario ?? valorTotal,
+        descontoItem: origem.descontoItem ?? origem.desconto_item ?? 0,
+        comissaoDentista: origem.comissaoDentista ?? origem.comissao_dentista ?? null,
         CPF_Dentista,
         fk_idProcedimento,
         fk_idAtendimento: idAtendimento
     };
+}
+
+function normalizarItensAtendimento(dados, idAtendimento, valorTotal) {
+    const origens = Array.isArray(dados.itens)
+        ? dados.itens
+        : [dados.item ?? dados];
+
+    return origens
+        .map((origem) => normalizarItemAtendimento(origem, idAtendimento, valorTotal))
+        .filter(Boolean);
+}
+
+async function preencherComissaoAutomatica(conn, item) {
+    if (item.comissaoDentista !== null && item.comissaoDentista !== undefined && item.comissaoDentista !== '') {
+        return item;
+    }
+
+    const [rows] = await conn.execute(
+        'SELECT tipoProcedimento FROM procedimento WHERE idProcedimento = ?',
+        [item.fk_idProcedimento]
+    );
+    const tipoProcedimento = rows[0]?.tipoProcedimento;
+    const tipoNormalizado = String(tipoProcedimento || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase();
+    const valorBase = (Number(item.qtd) * Number(item.valorUnit)) - Number(item.descontoItem || 0);
+
+    if (tipoNormalizado.startsWith('CL')) {
+        item.comissaoDentista = Number((valorBase * 0.50).toFixed(2));
+    } else if (tipoNormalizado.startsWith('ORTOD')) {
+        item.comissaoDentista = Number((valorBase * 0.35).toFixed(2));
+    } else {
+        item.comissaoDentista = 0;
+    }
+
+    return item;
 }
 
 const atendimentoRepository = {
@@ -54,9 +92,11 @@ const atendimentoRepository = {
                 atendimento.fk_CPF_Secretaria
             ]);
 
-            const item = normalizarItemAtendimento(dados, result.insertId, atendimento.valorTotal);
+            const itens = normalizarItensAtendimento(dados, result.insertId, atendimento.valorTotal);
 
-            if (item) {
+            for (const item of itens) {
+                await preencherComissaoAutomatica(conn, item);
+
                 const itemQuery = `
                     INSERT INTO itematendimento
                         (qtd, valorUnit, descontoItem, comissaoDentista, CPF_Dentista, fk_idProcedimento, fk_idAtendimento)
@@ -133,7 +173,7 @@ const atendimentoRepository = {
             WHERE a.idAtendimento = ?
         `;
         const [rows] = await connection.execute(query, [id]);
-        return rows[0];
+        return rows;
     },
 
     atualizar: async (id, dados) => {
@@ -160,9 +200,9 @@ const atendimentoRepository = {
                 id
             ]);
 
-            const item = normalizarItemAtendimento(dados, id, atendimento.valorTotal);
+            const itens = normalizarItensAtendimento(dados, id, atendimento.valorTotal);
 
-            if (item) {
+            if (itens.length) {
                 await conn.execute('DELETE FROM itematendimento WHERE fk_idAtendimento = ?', [id]);
 
                 const itemQuery = `
@@ -170,15 +210,19 @@ const atendimentoRepository = {
                         (qtd, valorUnit, descontoItem, comissaoDentista, CPF_Dentista, fk_idProcedimento, fk_idAtendimento)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 `;
-                await conn.execute(itemQuery, [
-                    item.qtd,
-                    item.valorUnit,
-                    item.descontoItem,
-                    item.comissaoDentista,
-                    item.CPF_Dentista,
-                    item.fk_idProcedimento,
-                    item.fk_idAtendimento
-                ]);
+
+                for (const item of itens) {
+                    await preencherComissaoAutomatica(conn, item);
+                    await conn.execute(itemQuery, [
+                        item.qtd,
+                        item.valorUnit,
+                        item.descontoItem,
+                        item.comissaoDentista,
+                        item.CPF_Dentista,
+                        item.fk_idProcedimento,
+                        item.fk_idAtendimento
+                    ]);
+                }
             }
 
             await conn.commit();
