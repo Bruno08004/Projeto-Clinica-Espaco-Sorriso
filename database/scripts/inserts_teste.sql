@@ -1,0 +1,169 @@
+-- MySQL dump 10.13  Distrib 8.0.43, for Win64 (x86_64)
+--
+-- Host: localhost    Database: clinica_odonto
+-- ------------------------------------------------------
+-- Server version	8.0.43
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Dumping data for table `atendimento`
+--
+
+LOCK TABLES `atendimento` WRITE;
+/*!40000 ALTER TABLE `atendimento` DISABLE KEYS */;
+INSERT IGNORE INTO `atendimento` VALUES (1,'Consulta','2024-01-05',110.00,'CLÍNICO',2,'10000010001','90011122233'),(2,'Procedimento programado','2024-01-10',120.00,'CLÍNICO',1,'10000010002','90011122233'),(3,'Retorno','2024-01-15',130.00,'CLÍNICO',3,'10000010003','90011122233'),(4,'Consulta','2024-01-20',140.00,'CLÍNICO',1,'10000010004','90011122233'),(5,'Atendimento agendado','2024-01-25',150.00,'CLÍNICO',1,'10000020000','90011122233'),(6,'Urgencia','2024-02-01',160.00,'CLÍNICO',3,'10000020001','90011122233'),(7,'Procedimento programado','2024-02-05',170.00,'CLÍNICO',1,'10000020002','90011122233'),(8,'Consulta','2024-02-10',180.00,'CLÍNICO',2,'10000020003','90011122233'),(9,'Retorno','2024-02-15',190.00,'CLÍNICO',1,'10000020004','90011122233'),(10,'Atendimento agendado','2024-02-20',100.00,'ORTODÔNTICO',1,'10000020005','90011122233'),(11,'Consulta','2024-03-01',110.00,'CLÍNICO',2,'10000020006','90011122233'),(12,'Procedimento programado','2024-03-05',120.00,'CLÍNICO',1,'10000020007','90011122233'),(13,'Retorno','2024-03-10',130.00,'CLÍNICO',1,'10000020008','90011122233'),(14,'Consulta','2024-03-15',140.00,'CLÍNICO',1,'10000020009','90011122233'),(15,'Atendimento agendado','2024-03-20',150.00,'CLÍNICO',1,'10000020010','90011122233'),(16,'Urgencia','2024-03-25',160.00,'CLÍNICO',2,'10000020011','90011122233'),(17,'Procedimento programado','2024-04-01',170.00,'CLÍNICO',1,'10000020012','90011122233'),(18,'Consulta','2024-04-05',180.00,'CLÍNICO',1,'10000020013','90011122233'),(19,'Retorno','2024-04-10',190.00,'CLÍNICO',3,'10000020014','90011122233'),(20,'Atendimento agendado','2024-04-15',100.00,'ORTODÔNTICO',2,'10000020015','90011122233'),(21,'Consulta','2024-04-20',110.00,'CLÍNICO',1,'10000020016','90011122233'),(22,'Procedimento programado','2024-04-25',120.00,'CLÍNICO',3,'10000020017','90011122233'),(23,'Retorno','2024-05-01',130.00,'CLÍNICO',1,'10000020018','90011122233'),(24,'Consulta','2024-05-06',140.00,'CLÍNICO',2,'10000020019','90011122233'),(25,'Atendimento agendado','2024-05-11',150.00,'CLÍNICO',1,'10000020020','90011122233'),(26,'Urgencia','2024-05-16',160.00,'CLÍNICO',1,'10000020021','90011122233'),(27,'Procedimento programado','2024-05-21',170.00,'CLÍNICO',2,'10000020022','90011122233'),(28,'Consulta','2024-05-26',180.00,'CLÍNICO',1,'10000020023','90011122233'),(29,'Retorno','2024-05-31',190.00,'CLÍNICO',3,'10000020024','90011122233'),(30,'Atendimento agendado','2024-06-05',100.00,'ORTODÔNTICO',1,'10000020025','90011122233'),(31,'Consulta','2024-06-10',110.00,'CLÍNICO',2,'10000020026','90011122233'),(32,'Procedimento programado','2024-06-15',120.00,'CLÍNICO',1,'10000020027','90011122233'),(33,'Retorno','2024-06-20',130.00,'CLÍNICO',1,'10000020028','90011122233'),(34,'Consulta','2024-06-25',140.00,'CLÍNICO',2,'10000020029','90011122233'),(35,'Atendimento agendado','2024-07-01',150.00,'CLÍNICO',1,'10000020030','90011122233'),(36,'Urgencia','2024-07-06',160.00,'CLÍNICO',3,'10000020031','90011122233'),(37,'Procedimento programado','2024-07-11',170.00,'CLÍNICO',1,'10000020032','90011122233'),(38,'Consulta','2024-07-16',180.00,'CLÍNICO',2,'10000020033','90011122233'),(39,'Retorno','2024-07-21',190.00,'CLÍNICO',1,'10000020034','90011122233'),(40,'Atendimento agendado','2024-07-26',100.00,'ORTODÔNTICO',1,'10000020035','90011122233'),(41,'Consulta','2024-08-01',110.00,'CLÍNICO',2,'10000020036','90011122233'),(42,'Procedimento programado','2024-08-06',120.00,'CLÍNICO',1,'10000020037','90011122233'),(43,'Retorno','2024-08-11',130.00,'CLÍNICO',1,'10000020038','90011122233'),(44,'Consulta','2024-08-16',140.00,'CLÍNICO',2,'10000020039','90011122233'),(45,'Atendimento agendado','2024-08-21',150.00,'CLÍNICO',1,'10000020040','90011122233'),(46,'Urgencia','2024-08-26',160.00,'CLÍNICO',1,'10000020041','90011122233'),(47,'Procedimento programado','2024-09-01',170.00,'CLÍNICO',2,'10000020042','90011122233'),(48,'Consulta','2024-09-06',180.00,'CLÍNICO',1,'10000020043','90011122233'),(49,'Retorno','2024-09-11',190.00,'CLÍNICO',3,'10000020044','90011122233'),(50,'Atendimento agendado','2024-09-16',100.00,'ORTODÔNTICO',1,'10000020045','90011122233'),(51,'Consulta','2024-09-21',110.00,'CLÍNICO',2,'10000010001','90011122233'),(52,'Procedimento programado','2024-09-26',120.00,'CLÍNICO',1,'10000010002','90011122233'),(53,'Retorno','2024-10-01',130.00,'CLÍNICO',1,'10000010003','90011122233'),(54,'Consulta','2024-10-06',140.00,'CLÍNICO',2,'10000010004','90011122233'),(55,'Atendimento agendado','2024-10-11',150.00,'CLÍNICO',1,'10000020005','90011122233'),(56,'Urgencia','2024-10-16',160.00,'CLÍNICO',3,'10000020006','90011122233'),(57,'Procedimento programado','2024-10-21',170.00,'CLÍNICO',1,'10000020007','90011122233'),(58,'Consulta','2024-10-26',180.00,'CLÍNICO',2,'10000020008','90011122233'),(59,'Retorno','2024-10-31',190.00,'CLÍNICO',1,'10000020009','90011122233'),(60,'Atendimento agendado','2024-11-05',100.00,'ORTODÔNTICO',1,'10000020010','90011122233'),(61,'Consulta','2024-11-10',110.00,'CLÍNICO',2,'10000020011','90011122233'),(62,'Procedimento programado','2024-11-15',120.00,'CLÍNICO',1,'10000020012','90011122233'),(63,'Retorno','2024-11-20',130.00,'CLÍNICO',3,'10000020013','90011122233'),(64,'Consulta','2024-11-25',140.00,'CLÍNICO',1,'10000020014','90011122233'),(65,'Atendimento agendado','2024-11-30',150.00,'CLÍNICO',1,'10000020015','90011122233'),(66,'Urgencia','2024-12-05',160.00,'CLÍNICO',2,'10000020016','90011122233'),(67,'Procedimento programado','2024-12-10',170.00,'CLÍNICO',1,'10000020017','90011122233'),(68,'Consulta','2024-12-15',180.00,'CLÍNICO',1,'10000020018','90011122233'),(69,'Retorno','2024-12-20',190.00,'CLÍNICO',3,'10000020019','90011122233'),(70,'Atendimento agendado','2024-12-25',100.00,'ORTODÔNTICO',1,'10000020020','90011122233'),(71,'Consulta','2024-12-26',110.00,'CLÍNICO',2,'10000020021','90011122233'),(72,'Procedimento programado','2024-12-27',120.00,'CLÍNICO',1,'10000020022','90011122233'),(73,'Retorno','2024-12-28',130.00,'CLÍNICO',1,'10000020023','90011122233'),(74,'Consulta','2024-12-29',140.00,'CLÍNICO',2,'10000020024','90011122233'),(75,'Atendimento agendado','2024-12-30',150.00,'CLÍNICO',1,'10000020025','90011122233'),(76,'Urgencia','2024-12-31',160.00,'CLÍNICO',3,'10000020026','90011122233'),(77,'Procedimento programado','2024-01-02',170.00,'CLÍNICO',1,'10000020027','90011122233'),(78,'Consulta','2024-01-03',180.00,'CLÍNICO',2,'10000020028','90011122233'),(79,'Retorno','2024-01-04',190.00,'CLÍNICO',1,'10000020029','90011122233'),(80,'Atendimento agendado','2024-02-01',100.00,'ORTODÔNTICO',1,'10000020030','90011122233'),(81,'Consulta','2024-02-03',110.00,'CLÍNICO',2,'10000020031','90011122233'),(82,'Procedimento programado','2024-03-04',120.00,'CLÍNICO',1,'10000020032','90011122233'),(83,'Retorno','2024-04-05',130.00,'CLÍNICO',3,'10000020033','90011122233'),(84,'Consulta','2024-05-06',140.00,'CLÍNICO',1,'10000020034','90011122233'),(85,'Atendimento agendado','2024-06-07',150.00,'CLÍNICO',1,'10000020035','90011122233'),(86,'Urgencia','2024-07-08',160.00,'CLÍNICO',2,'10000020036','90011122233'),(87,'Procedimento programado','2024-08-09',170.00,'CLÍNICO',1,'10000020037','90011122233'),(88,'Consulta','2024-09-10',180.00,'CLÍNICO',3,'10000020038','90011122233'),(89,'Retorno','2024-10-11',190.00,'CLÍNICO',1,'10000020039','90011122233'),(90,'Atendimento agendado','2024-11-12',100.00,'ORTODÔNTICO',1,'10000020040','90011122233'),(91,'Consulta','2024-01-14',110.00,'CLÍNICO',2,'10000020041','90011122233'),(92,'Procedimento programado','2024-02-15',120.00,'CLÍNICO',1,'10000020042','90011122233'),(93,'Retorno','2024-03-16',130.00,'CLÍNICO',3,'10000020043','90011122233'),(94,'Consulta','2024-04-17',140.00,'CLÍNICO',1,'10000020044','90011122233'),(95,'Atendimento agendado','2024-05-18',150.00,'CLÍNICO',1,'10000020045','90011122233'),(96,'Urgencia','2024-06-19',160.00,'CLÍNICO',3,'10000020000','90011122233'),(97,'Procedimento programado','2024-07-20',170.00,'CLÍNICO',1,'10000020001','90011122233'),(98,'Consulta','2024-08-21',180.00,'CLÍNICO',2,'10000020002','90011122233'),(99,'Retorno','2024-09-22',190.00,'CLÍNICO',1,'10000020003','90011122233'),(100,'Atendimento agendado','2024-10-23',100.00,'ORTODÔNTICO',1,'10000020004','90011122233');
+/*!40000 ALTER TABLE `atendimento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `dentista`
+--
+
+LOCK TABLES `dentista` WRITE;
+/*!40000 ALTER TABLE `dentista` DISABLE KEYS */;
+INSERT IGNORE INTO `dentista` VALUES ('10101010101','Dr. Juvenildo Silva Ferreira','CRO1234','BA','Clinico Geral'),('20202020202','Dra. Isis Carolina','CRO5678','BA','Ortodontico');
+/*!40000 ALTER TABLE `dentista` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `itematendimento`
+--
+
+LOCK TABLES `itematendimento` WRITE;
+/*!40000 ALTER TABLE `itematendimento` DISABLE KEYS */;
+INSERT IGNORE INTO `itematendimento` VALUES (1,110.00,0.00,55.00,'10101010101',1,1),(1,150.00,0.00,75.00,'10101010101',1,15),(1,190.00,0.00,95.00,'10101010101',1,29),(1,130.00,0.00,65.00,'10101010101',1,43),(1,170.00,0.00,85.00,'10101010101',1,57),(1,110.00,0.00,55.00,'10101010101',1,71),(1,150.00,0.00,75.00,'10101010101',1,85),(1,190.00,0.00,95.00,'10101010101',1,99),(1,120.00,0.00,60.00,'20202020202',2,2),(1,160.00,0.00,80.00,'20202020202',2,16),(1,100.00,0.00,50.00,'20202020202',2,30),(1,140.00,0.00,70.00,'20202020202',2,44),(1,180.00,0.00,90.00,'20202020202',2,58),(1,120.00,0.00,60.00,'20202020202',2,72),(1,160.00,0.00,80.00,'20202020202',2,86),(1,100.00,0.00,50.00,'20202020202',2,100),(1,130.00,0.00,65.00,'10101010101',3,3),(1,170.00,0.00,85.00,'10101010101',3,17),(1,110.00,0.00,55.00,'10101010101',3,31),(1,150.00,0.00,75.00,'10101010101',3,45),(1,190.00,0.00,95.00,'10101010101',3,59),(1,130.00,0.00,65.00,'10101010101',3,73),(1,170.00,0.00,85.00,'10101010101',3,87),(1,140.00,0.00,70.00,'20202020202',4,4),(1,180.00,0.00,90.00,'20202020202',4,18),(1,120.00,0.00,60.00,'20202020202',4,32),(1,160.00,0.00,80.00,'20202020202',4,46),(1,100.00,0.00,50.00,'20202020202',4,60),(1,140.00,0.00,70.00,'20202020202',4,74),(1,180.00,0.00,90.00,'20202020202',4,88),(1,150.00,0.00,75.00,'10101010101',5,5),(1,190.00,0.00,95.00,'10101010101',5,19),(1,130.00,0.00,65.00,'10101010101',5,33),(1,170.00,0.00,85.00,'10101010101',5,47),(1,110.00,0.00,55.00,'10101010101',5,61),(1,150.00,0.00,75.00,'10101010101',5,75),(1,190.00,0.00,95.00,'10101010101',5,89),(1,160.00,0.00,80.00,'20202020202',6,6),(1,100.00,0.00,50.00,'20202020202',6,20),(1,140.00,0.00,70.00,'20202020202',6,34),(1,180.00,0.00,90.00,'20202020202',6,48),(1,120.00,0.00,60.00,'20202020202',6,62),(1,160.00,0.00,80.00,'20202020202',6,76),(1,100.00,0.00,50.00,'20202020202',6,90),(1,170.00,0.00,85.00,'10101010101',7,7),(1,110.00,0.00,55.00,'10101010101',7,21),(1,150.00,0.00,75.00,'10101010101',7,35),(1,190.00,0.00,95.00,'10101010101',7,49),(1,130.00,0.00,65.00,'10101010101',7,63),(1,170.00,0.00,85.00,'10101010101',7,77),(1,110.00,0.00,55.00,'10101010101',7,91),(1,180.00,0.00,90.00,'20202020202',8,8),(1,120.00,0.00,60.00,'20202020202',8,22),(1,160.00,0.00,80.00,'20202020202',8,36),(1,100.00,0.00,50.00,'20202020202',8,50),(1,140.00,0.00,70.00,'20202020202',8,64),(1,180.00,0.00,90.00,'20202020202',8,78),(1,120.00,0.00,60.00,'20202020202',8,92),(1,190.00,0.00,95.00,'10101010101',9,9),(1,130.00,0.00,65.00,'10101010101',9,23),(1,170.00,0.00,85.00,'10101010101',9,37),(1,110.00,0.00,55.00,'10101010101',9,51),(1,150.00,0.00,75.00,'10101010101',9,65),(1,190.00,0.00,95.00,'10101010101',9,79),(1,130.00,0.00,65.00,'10101010101',9,93),(1,100.00,0.00,50.00,'20202020202',10,10),(1,140.00,0.00,70.00,'20202020202',10,24),(1,180.00,0.00,90.00,'20202020202',10,38),(1,120.00,0.00,60.00,'20202020202',10,52),(1,160.00,0.00,80.00,'20202020202',10,66),(1,100.00,0.00,50.00,'20202020202',10,80),(1,140.00,0.00,70.00,'20202020202',10,94),(1,110.00,0.00,55.00,'10101010101',11,11),(1,150.00,0.00,75.00,'10101010101',11,25),(1,190.00,0.00,95.00,'10101010101',11,39),(1,130.00,0.00,65.00,'10101010101',11,53),(1,170.00,0.00,85.00,'10101010101',11,67),(1,110.00,0.00,55.00,'10101010101',11,81),(1,150.00,0.00,75.00,'10101010101',11,95),(1,120.00,0.00,60.00,'20202020202',12,12),(1,160.00,0.00,80.00,'20202020202',12,26),(1,100.00,0.00,50.00,'20202020202',12,40),(1,140.00,0.00,70.00,'20202020202',12,54),(1,180.00,0.00,90.00,'20202020202',12,68),(1,120.00,0.00,60.00,'20202020202',12,82),(1,160.00,0.00,80.00,'20202020202',12,96),(1,130.00,0.00,65.00,'10101010101',13,13),(1,170.00,0.00,85.00,'10101010101',13,27),(1,110.00,0.00,55.00,'10101010101',13,41),(1,150.00,0.00,75.00,'10101010101',13,55),(1,190.00,0.00,95.00,'10101010101',13,69),(1,130.00,0.00,65.00,'10101010101',13,83),(1,170.00,0.00,85.00,'10101010101',13,97),(1,140.00,0.00,70.00,'20202020202',14,14),(1,180.00,0.00,90.00,'20202020202',14,28),(1,120.00,0.00,60.00,'20202020202',14,42),(1,160.00,0.00,80.00,'20202020202',14,56),(1,100.00,0.00,50.00,'20202020202',14,70),(1,140.00,0.00,70.00,'20202020202',14,84),(1,180.00,0.00,90.00,'20202020202',14,98);
+-- Atendimentos adicionais com mais de um procedimento para testar o fluxo de comissoes.
+-- Mantem alguns atendimentos com apenas 1 procedimento e adiciona exemplos com 2, 3 e 4 procedimentos.
+INSERT IGNORE INTO `itematendimento` VALUES
+(1,90.00,0.00,45.00,'20202020202',2,1),
+(1,130.00,10.00,60.00,'10101010101',3,2),
+(1,200.00,0.00,100.00,'20202020202',4,2),
+(1,250.00,0.00,87.50,'20202020202',12,10),
+(1,180.00,20.00,56.00,'10101010101',13,10),
+(2,85.00,0.00,85.00,'10101010101',7,15),
+(1,70.00,0.00,35.00,'20202020202',8,15),
+(1,300.00,0.00,105.00,'20202020202',12,20),
+(1,120.00,0.00,42.00,'10101010101',13,20),
+(1,95.00,5.00,31.50,'20202020202',14,20),
+(1,210.00,10.00,100.00,'10101010101',11,31),
+(1,60.00,0.00,30.00,'20202020202',7,31),
+(1,80.00,0.00,40.00,'10101010101',8,31),
+(1,140.00,0.00,70.00,'20202020202',9,31);
+/*!40000 ALTER TABLE `itematendimento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- Totais ajustados para os atendimentos que possuem mais de um procedimento nos dados de teste.
+UPDATE `atendimento`
+SET `valorTotal` = CASE `idAtendimento`
+  WHEN 1 THEN 200.00
+  WHEN 2 THEN 440.00
+  WHEN 10 THEN 510.00
+  WHEN 15 THEN 390.00
+  WHEN 20 THEN 610.00
+  WHEN 31 THEN 590.00
+  ELSE `valorTotal`
+END
+WHERE `idAtendimento` IN (1,2,10,15,20,31);
+
+--
+-- Dumping data for table `paciente`
+--
+
+LOCK TABLES `paciente` WRITE;
+/*!40000 ALTER TABLE `paciente` DISABLE KEYS */;
+INSERT IGNORE INTO `paciente` VALUES ('10000010001','ana.luiza@example.com','Ana Luiza','45000000',655,'Centro','Rua Modelo','Vitoria da Conquista','BA','2002-05-14'),('10000010002','joao.vitorlemos@example.com','Joao Vitor Lemos','45000000',115,'Centro','Rua Modelo','Vitoria da Conquista','BA','1999-11-22'),('10000010003','grazielly.barros@example.com','Grazielly Barros','45000000',26,'Centro','Rua Modelo','Vitoria da Conquista','BA','2001-08-03'),('10000010004','bruno.campos@example.com','Bruno Campos','45000000',760,'Centro','Rua Modelo','Vitoria da Conquista','BA','1998-01-27'),('10000020000','marina.pinto@example.com','Marina Pinto','45000000',282,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1997-12-24'),('10000020001','roberto.moura@example.com','Roberto Moura','45000001',251,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1977-04-03'),('10000020002','camila.moura@example.com','Camila Moura','45000002',229,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1983-01-17'),('10000020003','marcos.gomes@example.com','Marcos Gomes','45000003',143,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1975-08-09'),('10000020004','sofia.moura@example.com','Sofia Moura','45000004',755,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1986-09-26'),('10000020005','paula.araujo@example.com','Paula Araujo','45000005',105,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1999-01-07'),('10000020006','marcelo.costa+10000020006@example.com','Marcelo Costa','45000006',693,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1994-03-04'),('10000020007','sofia.almeida@example.com','Sofia Almeida','45000007',759,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1998-10-19'),('10000020008','roberto.pereira@example.com','Roberto Pereira','45000008',914,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2003-08-19'),('10000020009','thiago.oliveira@example.com','Thiago Oliveira','45000009',559,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1981-01-19'),('10000020010','gabriel.lima+10000020010@example.com','Gabriel Lima','45000010',90,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1985-01-25'),('10000020011','andre.souza@example.com','Andre Souza','45000011',605,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2007-03-12'),('10000020012','eduardo.costa@example.com','Eduardo Costa','45000012',433,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2007-03-12'),('10000020013','thiago.ferreira@example.com','Thiago Ferreira','45000013',33,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2006-07-14'),('10000020014','daniela.pereira@example.com','Daniela Pereira','45000014',31,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2003-03-26'),('10000020015','bruna.moura@example.com','Bruna Moura','45000015',96,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1988-09-13'),('10000020016','bruno.almeida@example.com','Bruno Almeida','45000016',224,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1991-09-03'),('10000020017','isabela.rocha@example.com','Isabela Rocha','45000017',239,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1984-05-25'),('10000020018','marcelo.costa+10000020018@example.com','Marcelo Costa','45000018',518,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2004-10-30'),('10000020019','vitor.santos@example.com','Vitor Santos','45000019',617,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1997-05-26'),('10000020020','ana.ferreira@example.com','Ana Ferreira','45000020',28,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1997-07-03'),('10000020021','jose.santos@example.com','Jose Santos','45000021',575,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1987-06-19'),('10000020022','bruno.lopes@example.com','Bruno Lopes','45000022',204,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2002-09-01'),('10000020023','renata.lima+10000020023@example.com','Renata Lima','45000023',734,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1977-05-20'),('10000020024','marcio.almeida@example.com','Marcio Almeida','45000024',666,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2002-06-22'),('10000020025','andre.costa@example.com','Andre Costa','45000025',719,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2006-08-26'),('10000020026','vitor.barros@example.com','Vitor Barros','45000026',559,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1985-02-15'),('10000020027','isabela.lopes@example.com','Isabela Lopes','45000027',430,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1996-05-20'),('10000020028','ana.araujo@example.com','Ana Araujo','45000028',226,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1985-11-02'),('10000020029','renata.lima+10000020029@example.com','Renata Lima','45000029',460,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1997-11-21'),('10000020030','bruno.pinto@example.com','Bruno Pinto','45000030',604,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1991-03-25'),('10000020031','marcio.silva@example.com','Marcio Silva','45000031',285,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1987-06-24'),('10000020032','vitor.oliveira+10000020032@example.com','Vitor Oliveira','45000032',829,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1988-09-11'),('10000020033','marcelo.oliveira@example.com','Marcelo Oliveira','45000033',891,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2006-01-19'),('10000020034','marcos.nunes@example.com','Marcos Nunes','45000034',7,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1990-08-10'),('10000020035','isabela.gomes@example.com','Isabela Gomes','45000035',778,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1992-09-27'),('10000020036','lucas.lopes@example.com','Lucas Lopes','45000036',826,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1984-01-07'),('10000020037','rafael.ferreira@example.com','Rafael Ferreira','45000037',164,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1999-09-23'),('10000020038','sofia.araujo@example.com','Sofia Araujo','45000038',715,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2005-11-13'),('10000020039','isabela.pinto@example.com','Isabela Pinto','45000039',433,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1989-06-15'),('10000020040','carlos.silva@example.com','Carlos Silva','45000040',349,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1987-07-10'),('10000020041','larissa.barros@example.com','Larissa Barros','45000041',285,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1994-04-02'),('10000020042','vitor.oliveira+10000020042@example.com','Vitor Oliveira','45000042',160,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','2000-10-29'),('10000020043','gustavo.costa@example.com','Gustavo Costa','45000043',221,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1980-09-04'),('10000020044','gabriel.lima+10000020044@example.com','Gabriel Lima','45000044',981,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1991-08-11'),('10000020045','roberto.lima@example.com','Roberto Lima','45000045',782,'Bairro','Rua Aleatoria','Vitoria da Conquista','BA','1975-04-21');
+/*!40000 ALTER TABLE `paciente` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `pagamento`
+--
+
+LOCK TABLES `pagamento` WRITE;
+/*!40000 ALTER TABLE `pagamento` DISABLE KEYS */;
+INSERT IGNORE INTO `pagamento` VALUES (1,'2024-01-05',110.00,0.00,110.00,'DINHEIRO',1),(2,'2024-01-10',120.00,0.00,120.00,'DINHEIRO',2),(3,'2024-01-15',130.00,0.00,130.00,'DINHEIRO',3),(4,'2024-01-20',140.00,0.00,140.00,'DINHEIRO',4),(5,'2024-01-25',150.00,0.00,150.00,'DINHEIRO',5),(6,'2024-02-01',160.00,0.00,160.00,'DINHEIRO',6),(7,'2024-02-05',170.00,0.00,170.00,'DINHEIRO',7),(8,'2024-02-10',180.00,0.00,180.00,'DINHEIRO',8),(9,'2024-02-15',190.00,0.00,190.00,'DINHEIRO',9),(10,'2024-02-20',100.00,0.00,100.00,'DINHEIRO',10),(11,'2024-03-01',110.00,0.00,110.00,'DINHEIRO',11),(12,'2024-03-05',120.00,0.00,120.00,'DINHEIRO',12),(13,'2024-03-10',130.00,0.00,130.00,'DINHEIRO',13),(14,'2024-03-15',140.00,0.00,140.00,'DINHEIRO',14),(15,'2024-03-20',150.00,0.00,150.00,'DINHEIRO',15),(16,'2024-03-25',160.00,0.00,160.00,'DINHEIRO',16),(17,'2024-04-01',170.00,0.00,170.00,'DINHEIRO',17),(18,'2024-04-05',180.00,0.00,180.00,'DINHEIRO',18),(19,'2024-04-10',190.00,0.00,190.00,'DINHEIRO',19),(20,'2024-04-15',100.00,0.00,100.00,'DINHEIRO',20),(21,'2024-04-20',110.00,0.00,110.00,'DINHEIRO',21),(22,'2024-04-25',120.00,0.00,120.00,'DINHEIRO',22),(23,'2024-05-01',130.00,0.00,130.00,'DINHEIRO',23),(24,'2024-05-06',140.00,0.00,140.00,'DINHEIRO',24),(25,'2024-05-11',150.00,0.00,150.00,'DINHEIRO',25),(26,'2024-05-16',160.00,0.00,160.00,'DINHEIRO',26),(27,'2024-05-21',170.00,0.00,170.00,'DINHEIRO',27),(28,'2024-05-26',180.00,0.00,180.00,'DINHEIRO',28),(29,'2024-05-31',190.00,0.00,190.00,'DINHEIRO',29),(30,'2024-06-05',100.00,0.00,100.00,'DINHEIRO',30),(31,'2024-06-10',110.00,0.00,110.00,'DINHEIRO',31),(32,'2024-06-15',120.00,0.00,120.00,'DINHEIRO',32),(33,'2024-06-20',130.00,0.00,130.00,'DINHEIRO',33),(34,'2024-06-25',140.00,0.00,140.00,'DINHEIRO',34),(35,'2024-07-01',150.00,0.00,150.00,'DINHEIRO',35),(36,'2024-07-06',160.00,0.00,160.00,'DINHEIRO',36),(37,'2024-07-11',170.00,0.00,170.00,'DINHEIRO',37),(38,'2024-07-16',180.00,0.00,180.00,'DINHEIRO',38),(39,'2024-07-21',190.00,0.00,190.00,'DINHEIRO',39),(40,'2024-07-26',100.00,0.00,100.00,'DINHEIRO',40),(41,'2024-08-01',110.00,0.00,110.00,'DINHEIRO',41),(42,'2024-08-06',120.00,0.00,120.00,'DINHEIRO',42),(43,'2024-08-11',130.00,0.00,130.00,'DINHEIRO',43),(44,'2024-08-16',140.00,0.00,140.00,'DINHEIRO',44),(45,'2024-08-21',150.00,0.00,150.00,'DINHEIRO',45),(46,'2024-08-26',160.00,0.00,160.00,'DINHEIRO',46),(47,'2024-09-01',170.00,0.00,170.00,'DINHEIRO',47),(48,'2024-09-06',180.00,0.00,180.00,'DINHEIRO',48),(49,'2024-09-11',190.00,0.00,190.00,'DINHEIRO',49),(50,'2024-09-16',100.00,0.00,100.00,'DINHEIRO',50),(51,'2024-09-21',110.00,0.00,110.00,'DINHEIRO',51),(52,'2024-09-26',120.00,0.00,120.00,'DINHEIRO',52),(53,'2024-10-01',130.00,0.00,130.00,'DINHEIRO',53),(54,'2024-10-06',140.00,0.00,140.00,'DINHEIRO',54),(55,'2024-10-11',150.00,0.00,150.00,'DINHEIRO',55),(56,'2024-10-16',160.00,0.00,160.00,'DINHEIRO',56),(57,'2024-10-21',170.00,0.00,170.00,'DINHEIRO',57),(58,'2024-10-26',180.00,0.00,180.00,'DINHEIRO',58),(59,'2024-10-31',190.00,0.00,190.00,'DINHEIRO',59),(60,'2024-11-05',100.00,0.00,100.00,'DINHEIRO',60),(61,'2024-11-10',110.00,0.00,110.00,'DINHEIRO',61),(62,'2024-11-15',120.00,0.00,120.00,'DINHEIRO',62),(63,'2024-11-20',130.00,0.00,130.00,'DINHEIRO',63),(64,'2024-11-25',140.00,0.00,140.00,'DINHEIRO',64),(65,'2024-11-30',150.00,0.00,150.00,'DINHEIRO',65),(66,'2024-12-05',160.00,0.00,160.00,'DINHEIRO',66),(67,'2024-12-10',170.00,0.00,170.00,'DINHEIRO',67),(68,'2024-12-15',180.00,0.00,180.00,'DINHEIRO',68),(69,'2024-12-20',190.00,0.00,190.00,'DINHEIRO',69),(70,'2024-12-25',100.00,0.00,100.00,'DINHEIRO',70),(71,'2024-12-26',110.00,0.00,110.00,'DINHEIRO',71),(72,'2024-12-27',120.00,0.00,120.00,'DINHEIRO',72),(73,'2024-12-28',130.00,0.00,130.00,'DINHEIRO',73),(74,'2024-12-29',140.00,0.00,140.00,'DINHEIRO',74),(75,'2024-12-30',150.00,0.00,150.00,'DINHEIRO',75),(76,'2024-12-31',160.00,0.00,160.00,'DINHEIRO',76),(77,'2024-01-02',170.00,0.00,170.00,'DINHEIRO',77),(78,'2024-01-03',180.00,0.00,180.00,'DINHEIRO',78),(79,'2024-01-04',190.00,0.00,190.00,'DINHEIRO',79),(80,'2024-02-01',100.00,0.00,100.00,'DINHEIRO',80),(81,'2024-02-03',110.00,0.00,110.00,'DINHEIRO',81),(82,'2024-03-04',120.00,0.00,120.00,'DINHEIRO',82),(83,'2024-04-05',130.00,0.00,130.00,'DINHEIRO',83),(84,'2024-05-06',140.00,0.00,140.00,'DINHEIRO',84),(85,'2024-06-07',150.00,0.00,150.00,'DINHEIRO',85),(86,'2024-07-08',160.00,0.00,160.00,'DINHEIRO',86),(87,'2024-08-09',170.00,0.00,170.00,'DINHEIRO',87),(88,'2024-09-10',180.00,0.00,180.00,'DINHEIRO',88),(89,'2024-10-11',190.00,0.00,190.00,'DINHEIRO',89),(90,'2024-11-12',100.00,0.00,100.00,'DINHEIRO',90),(91,'2024-01-14',110.00,0.00,110.00,'DINHEIRO',91),(92,'2024-02-15',120.00,0.00,120.00,'DINHEIRO',92),(93,'2024-03-16',130.00,0.00,130.00,'DINHEIRO',93),(94,'2024-04-17',140.00,0.00,140.00,'DINHEIRO',94),(95,'2024-05-18',150.00,0.00,150.00,'DINHEIRO',95),(96,'2024-06-19',160.00,0.00,160.00,'DINHEIRO',96),(97,'2024-07-20',170.00,0.00,170.00,'DINHEIRO',97),(98,'2024-08-21',180.00,0.00,180.00,'DINHEIRO',98),(99,'2024-09-22',190.00,0.00,190.00,'DINHEIRO',99),(100,'2024-10-23',100.00,0.00,100.00,'DINHEIRO',100);
+/*!40000 ALTER TABLE `pagamento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- Pagamentos ajustados para acompanhar os novos totais dos atendimentos com multiplos procedimentos.
+UPDATE `pagamento`
+SET `valorBruto` = CASE `fk_dAtendimento`
+  WHEN 1 THEN 200.00
+  WHEN 2 THEN 440.00
+  WHEN 10 THEN 510.00
+  WHEN 15 THEN 390.00
+  WHEN 20 THEN 610.00
+  WHEN 31 THEN 590.00
+  ELSE `valorBruto`
+END,
+`valorLiquido` = CASE `fk_dAtendimento`
+  WHEN 1 THEN 200.00
+  WHEN 2 THEN 440.00
+  WHEN 10 THEN 510.00
+  WHEN 15 THEN 390.00
+  WHEN 20 THEN 610.00
+  WHEN 31 THEN 590.00
+  ELSE `valorLiquido`
+END
+WHERE `fk_dAtendimento` IN (1,2,10,15,20,31);
+
+--
+-- Dumping data for table `procedimento`
+--
+
+LOCK TABLES `procedimento` WRITE;
+/*!40000 ALTER TABLE `procedimento` DISABLE KEYS */;
+INSERT IGNORE INTO `procedimento` VALUES (1,'Remocao de placa, tartaro e polimento','CLÍNICO','Limpeza (Profilaxia)'),(2,'Restauracao de carie em 1 face','CLÍNICO','Restauracao (1 face)'),(3,'Restauracao de carie em multiplas faces','CLÍNICO','Restauracao (multifacial)'),(4,'Tratamento de canal de 1 canal','CLÍNICO','Tratamento Endodontico (1 canal)'),(5,'Remocao de dente permanente','CLÍNICO','Extracao Simples'),(6,'Clareamento em consultorio (sessao)','CLÍNICO','Clareamento Dental'),(7,'Aplicacao topica de fluor','CLÍNICO','Aplicacao de Fluor'),(8,'Exame radiografico periapical','CLÍNICO','Radiografia Periapical'),(9,'Tratamento periodontal (raspagem)','CLÍNICO','Raspagem e Alisamento Radicular'),(10,'Confecao e prova de protese parcial removivel','CLÍNICO','Protese Parcial Removivel'),(11,'Procedimento de implante dentario (simulacao) e planejamento','CLÍNICO','Implante (simulado)'),(12,'Colocacao do aparelho fixo','ORTODÔNTICO','Instalacao de Aparelho Ortodontico'),(13,'Ajustes periodicos do aparelho','ORTODÔNTICO','Ajuste de Aparelho Ortodontico'),(14,'Remocao do aparelho ortodontico','ORTODÔNTICO','Retirada de Aparelho Ortodontico');
+/*!40000 ALTER TABLE `procedimento` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `secretaria`
+--
+
+LOCK TABLES `secretaria` WRITE;
+/*!40000 ALTER TABLE `secretaria` DISABLE KEYS */;
+INSERT IGNORE INTO `secretaria` VALUES ('90011122233','Jaqueline Rocha');
+/*!40000 ALTER TABLE `secretaria` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `telefone_dentista`
+--
+
+LOCK TABLES `telefone_dentista` WRITE;
+/*!40000 ALTER TABLE `telefone_dentista` DISABLE KEYS */;
+INSERT IGNORE INTO `telefone_dentista` VALUES ('(77)98888-1111','10101010101'),('(77)97777-2222','20202020202');
+/*!40000 ALTER TABLE `telefone_dentista` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `telefone_paciente`
+--
+
+LOCK TABLES `telefone_paciente` WRITE;
+/*!40000 ALTER TABLE `telefone_paciente` DISABLE KEYS */;
+INSERT IGNORE INTO `telefone_paciente` VALUES ('(77)94808-8123','10000010003'),('(77)92591-8433','10000010004'),('(77)90053-5315','10000020000'),('(77)98201-3927','10000020001'),('(77)98317-2743','10000020002'),('(77)94889-9317','10000020003'),('(77)99977-4258','10000020004'),('(77)92504-7126','10000020005'),('(77)92646-9837','10000020006'),('(77)98689-1009','10000020007'),('(77)99813-6310','10000020008'),('(77)98005-1319','10000020009'),('(77)91832-6947','10000020010'),('(77)95038-4923','10000020011'),('(77)90949-4946','10000020012'),('(77)99295-2290','10000020013'),('(77)91403-8962','10000020014'),('(77)91133-9727','10000020015'),('(77)92060-3103','10000020016'),('(77)97787-3705','10000020017'),('(77)94342-9645','10000020018'),('(77)99938-7932','10000020019'),('(77)93470-9835','10000020020'),('(77)93295-6107','10000020021'),('(77)96537-7118','10000020022'),('(77)97177-9479','10000020023'),('(77)97397-2982','10000020024'),('(77)94061-4681','10000020025'),('(77)91049-6539','10000020026'),('(77)90344-4770','10000020027'),('(77)99641-4608','10000020028'),('(77)90117-2163','10000020029'),('(77)90964-4750','10000020030'),('(77)91104-1514','10000020031'),('(77)95413-2160','10000020032'),('(77)98423-4899','10000020033'),('(77)94562-8953','10000020034'),('(77)93510-9834','10000020035'),('(77)92167-8744','10000020036'),('(77)93981-8749','10000020037'),('(77)96669-4119','10000020038'),('(77)91545-2588','10000020039'),('(77)97062-6804','10000020040'),('(77)96939-7735','10000020041'),('(77)97651-1887','10000020042'),('(77)91612-1993','10000020043'),('(77)96596-6559','10000020044'),('(77)91790-5073','10000020045');
+/*!40000 ALTER TABLE `telefone_paciente` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-05-15 22:28:08

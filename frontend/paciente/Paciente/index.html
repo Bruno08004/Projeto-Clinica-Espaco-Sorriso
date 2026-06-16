@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Pacientes</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../global.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <img src="../../assests/logo.png" alt="Espaço Sorriso">
+  </div>
+
+  <h1>Espaço Sorriso - Sistema de Gestão</h1>
+
+  <nav>
+    <a href="javascript:irParaInicio()">Início</a>
+    <a href="#">Relatórios</a>
+    <a href="#">Configurações</a>
+    <a href="javascript:sair()">Sair</a>
+  </nav>
+
+  <div class="profile">👤</div>
+</header>
+
+<main class="container">
+
+  <!-- TÍTULO -->
+  <div class="title">
+    <h2>Gerenciamento de Pacientes</h2>
+    <p>Cadastre, edite e consulte informações básicas dos pacientes.</p>
+  </div>
+
+  <!-- BUSCA -->
+  <div class="search-bar">
+    <input id="busca-input" type="text" placeholder="Buscar por nome, CPF ou telefone...">
+    <button id="busca-btn">Pesquisar</button>
+  </div>
+
+  <div class="content">
+
+    <!-- TABELA -->
+    <div class="table-box">
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Endereço</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Maria Silva</td>
+            <td>123.456.789-00</td>
+            <td>(11) 99999-9999</td>
+            <td>Rua Exemplo, 123</td>
+            <td>01/01/2000</td>
+            <td>
+              <button class="edit">Editar</button>
+              <button class="delete">Excluir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <div class="form-box">
+
+      <div class="tabs">
+        <button class="active">Cadastrar Paciente</button>
+        <button>Editar Paciente</button>
+      </div>
+
+      <form id="form-paciente">
+        <input id="nome" placeholder="Nome*">
+        <input id="cpf" placeholder="CPF*">
+        <input id="email" placeholder="Email*">
+        <input id="cep" placeholder="CEP*">
+        <input id="numero" placeholder="Número*">
+        <input id="bairro" placeholder="Bairro*">
+        <input id="logradouro" placeholder="Rua/Logradouro*">
+        <input id="cidade" placeholder="Cidade*">
+        <input id="uf" placeholder="UF (ex: SP)*">
+        <input id="data-nascimento" type="date" placeholder="Data de Nascimento">
+        <input id="telefone" placeholder="Telefone (ex: 11999999999)">
+
+        <button type="submit" class="save">Salvar</button>
+      </form>
+
+    </div>
+
+  </div>
+
+</main>
+
+<footer class="footer">
+  <button onclick="sair()">SAIR</button>
+</footer>
+
+<!-- MODAL CUSTOMIZADO -->
+<div id="modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-message" id="modal-message"></div>
+    <div class="modal-buttons" id="modal-buttons"></div>
+  </div>
+</div>
+
+<script>
+  // ===== FUNÇÕES DE MODAL =====
+  const modalElement = document.getElementById('modal');
+
+  function showModal(title, message, type = 'info', buttons = []) {
+    const modal = document.getElementById('modal');
+    const iconEl = document.getElementById('modal-icon');
+    const titleEl = document.getElementById('modal-title');
+    const messageEl = document.getElementById('modal-message');
+    const buttonsEl = document.getElementById('modal-buttons');
+
+    // Definir ícone e classe baseado no tipo
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '⚠',
+      info: 'ℹ',
+      confirm: '?'
+    };
+
+    modal.className = 'modal-overlay active modal-' + type;
+    iconEl.textContent = icons[type] || icons.info;
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Limpar botões antigos
+    buttonsEl.innerHTML = '';
+
+    // Adicionar botões
+    buttons.forEach(btn => {
+      const button = document.createElement('button');
+      button.className = 'modal-btn ' + (btn.className || 'modal-btn-secondary');
+      button.textContent = btn.text;
+      button.onclick = () => {
+        btn.action();
+        modal.classList.remove('active');
+      };
+      buttonsEl.appendChild(button);
+    });
+
+    // Fechar ao clicar no overlay
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    };
+  }
+
+  function showAlert(title, message, type = 'info') {
+    showModal(title, message, type, [
+      {
+        text: 'OK',
+        className: 'modal-btn-primary',
+        action: () => {}
+      }
+    ]);
+  }
+
+  function showConfirm(title, message, onConfirm, onCancel = null) {
+    showModal(title, message, 'confirm', [
+      {
+        text: 'Cancelar',
+        className: 'modal-btn-secondary',
+        action: onCancel || (() => {})
+      },
+      {
+        text: 'Confirmar',
+        className: 'modal-btn-danger',
+        action: onConfirm
+      }
+    ]);
+  }
+
+  // ===== FUNÇÕES PRINCIPAIS =====
+  const formPaciente = document.getElementById('form-paciente');
+  const tbody = document.querySelector('table tbody');
+  let cpfEmEdicao = null;
+
+  // 1. Função que BUSCA e DESENHA a tabela (GET)
+  async function carregarPacientes() {
+    try {
+      const resposta = await fetch('http://localhost:3000/pacientes');
+      const pacientes = await resposta.json();
+
+      tbody.innerHTML = '';
+
+      pacientes.forEach(paciente => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${paciente.nome}</td>
+          <td>${paciente.CPF_Paciente}</td>
+          <td>${paciente.email}</td>
+          <td>${paciente.telefone || '-'}</td>
+          <td>${paciente.logradouro}, ${paciente.numero}</td>
+          <td>
+            <button class="edit" data-cpf="${paciente.CPF_Paciente}">Editar</button>
+            <button class="delete" data-cpf="${paciente.CPF_Paciente}">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        tr.querySelector('.edit').addEventListener('click', () => editarPaciente(paciente));
+        tr.querySelector('.delete').addEventListener('click', () => excluirPaciente(paciente.CPF_Paciente));
+      });
+    } catch (erro) {
+      console.error('Erro ao carregar tabela:', erro);
+      alert('Erro ao carregar pacientes');
+    }
+  }
+
+  carregarPacientes();
+
+  // 2. Função para EDITAR paciente
+  function editarPaciente(paciente) {
+    document.getElementById('nome').value = paciente.nome;
+    document.getElementById('cpf').value = paciente.CPF_Paciente;
+    document.getElementById('email').value = paciente.email;
+    document.getElementById('cep').value = paciente.CEP;
+    document.getElementById('numero').value = paciente.numero;
+    document.getElementById('bairro').value = paciente.bairro;
+    document.getElementById('logradouro').value = paciente.logradouro;
+    document.getElementById('cidade').value = paciente.cidade;
+    document.getElementById('uf').value = paciente.UF;
+    document.getElementById('data-nascimento').value = paciente.data_nascimento || '';
+    document.getElementById('telefone').value = paciente.telefone || '';
+    
+    cpfEmEdicao = paciente.CPF_Paciente;
+    
+    document.querySelector('.save').textContent = 'Atualizar';
+    document.querySelectorAll('.tabs button')[1].classList.add('active');
+    document.querySelectorAll('.tabs button')[0].classList.remove('active');
+    
+    document.querySelector('.form-box').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // 3. Função para EXCLUIR paciente
+  async function excluirPaciente(cpf) {
+    showConfirm(
+      'Excluir Paciente',
+      'Tem certeza que deseja excluir este paciente? Esta ação não pode ser desfeita.',
+      async () => {
+        try {
+          const resposta = await fetch(`http://localhost:3000/pacientes/${cpf}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          const resultado = await resposta.json();
+
+          if (resposta.ok) {
+            showAlert('Sucesso!', resultado.mensagem, 'success');
+            carregarPacientes();
+          } else {
+            showAlert('Erro', resultado.erro, 'error');
+          }
+        } catch (erro) {
+          console.error(erro);
+          showAlert('Erro', 'Erro ao excluir paciente', 'error');
+        }
+      }
+    );
+  }
+
+  // 4. Função que SALVA ou ATUALIZA o paciente (POST ou PUT)
+  formPaciente.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+
+    const dados = {
+      nome: document.getElementById('nome').value,
+      cpf: document.getElementById('cpf').value,
+      email: document.getElementById('email').value,
+      cep: document.getElementById('cep').value,
+      numero: document.getElementById('numero').value,
+      bairro: document.getElementById('bairro').value,
+      logradouro: document.getElementById('logradouro').value,
+      cidade: document.getElementById('cidade').value,
+      uf: document.getElementById('uf').value,
+      data_nascimento: document.getElementById('data-nascimento').value || null,
+      telefone: document.getElementById('telefone').value || null
+    };
+
+    try {
+      let url = 'http://localhost:3000/pacientes';
+      let metodo = 'POST';
+
+      if (cpfEmEdicao) {
+        url = `http://localhost:3000/pacientes/${cpfEmEdicao}`;
+        metodo = 'PUT';
+      }
+
+      const resposta = await fetch(url, {
+        method: metodo,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dados)
+      });
+
+      const resultado = await resposta.json();
+
+      if (resposta.ok) {
+        const mensagemSucesso = resultado.mensagem || (cpfEmEdicao ? 'Dados atualizados com sucesso' : 'Cadastro realizado com sucesso');
+        showAlert('Sucesso!', mensagemSucesso, 'success');
+        formPaciente.reset();
+        cpfEmEdicao = null;
+        
+        document.querySelector('.save').textContent = 'Salvar';
+        document.querySelectorAll('.tabs button')[0].classList.add('active');
+        document.querySelectorAll('.tabs button')[1].classList.remove('active');
+        
+        carregarPacientes();
+      } else {
+        showAlert('Aviso', resultado.erro, 'warning');
+      }
+    } catch (erro) {
+      console.error(erro);
+      showAlert('Erro', 'O backend não respondeu.', 'error');
+    }
+  });
+
+  // 5. Botão para limpar formulário
+  document.querySelectorAll('.tabs button')[0].addEventListener('click', () => {
+    formPaciente.reset();
+    cpfEmEdicao = null;
+    document.querySelector('.save').textContent = 'Salvar';
+    document.querySelectorAll('.tabs button')[0].classList.add('active');
+    document.querySelectorAll('.tabs button')[1].classList.remove('active');
+  });
+
+  // 6. Função para BUSCAR pacientes
+  const buscaInput = document.getElementById('busca-input');
+  const buscaBtn = document.getElementById('busca-btn');
+
+  buscaBtn.addEventListener('click', async () => {
+    const termoBusca = buscaInput.value.trim();
+
+    if (!termoBusca) {
+      showAlert('Campo vazio', 'Digite algo para buscar', 'warning');
+      return;
+    }
+
+    try {
+      const resposta = await fetch('http://localhost:3000/pacientes');
+      const pacientes = await resposta.json();
+
+      const pacientesEncontrados = pacientes.filter(paciente => 
+        paciente.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        paciente.CPF_Paciente.includes(termoBusca) ||
+        paciente.email.toLowerCase().includes(termoBusca.toLowerCase())
+      );
+
+      tbody.innerHTML = '';
+
+      if (pacientesEncontrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Paciente não encontrado</td></tr>';
+        return;
+      }
+
+      pacientesEncontrados.forEach(paciente => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${paciente.nome}</td>
+          <td>${paciente.CPF_Paciente}</td>
+          <td>${paciente.email}</td>
+          <td>${paciente.telefone || '-'}</td>
+          <td>${paciente.logradouro}, ${paciente.numero}</td>
+          <td>
+            <button class="edit" data-cpf="${paciente.CPF_Paciente}">Editar</button>
+            <button class="delete" data-cpf="${paciente.CPF_Paciente}">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        tr.querySelector('.edit').addEventListener('click', () => editarPaciente(paciente));
+        tr.querySelector('.delete').addEventListener('click', () => excluirPaciente(paciente.CPF_Paciente));
+      });
+    } catch (erro) {
+      console.error('Erro ao buscar:', erro);
+      showAlert('Erro', 'Erro ao buscar pacientes', 'error');
+    }
+  });
+
+  buscaInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      buscaBtn.click();
+    }
+  });
+
+  const botaoLimparBusca = document.createElement('button');
+  botaoLimparBusca.textContent = 'Limpar Busca';
+  botaoLimparBusca.style.marginLeft = '10px';
+  botaoLimparBusca.addEventListener('click', () => {
+    buscaInput.value = '';
+    carregarPacientes();
+  });
+  document.querySelector('.search-bar').appendChild(botaoLimparBusca);
+
+  // Funções de navegação
+  function irParaInicio() {
+    window.location.href = '../../Tela/index.html';
+  }
+
+  function sair() {
+    showConfirm(
+      'Sair do Sistema',
+      'Tem certeza que deseja sair?',
+      () => {
+        window.location.href = '../../Tela/index.html';
+      }
+    );
+  }
+</script>
+
+</body>
+</html>
