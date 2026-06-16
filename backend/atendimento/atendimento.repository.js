@@ -240,6 +240,7 @@ const atendimentoRepository = {
 
         try {
             await conn.beginTransaction();
+            await conn.execute('DELETE FROM pagamento WHERE fk_dAtendimento = ?', [id]);
             await conn.execute('DELETE FROM itematendimento WHERE fk_idAtendimento = ?', [id]);
             const [result] = await conn.execute('DELETE FROM atendimento WHERE idAtendimento = ?', [id]);
             await conn.commit();

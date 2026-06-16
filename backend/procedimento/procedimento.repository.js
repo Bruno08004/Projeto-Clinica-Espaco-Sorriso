@@ -20,7 +20,17 @@ export const cadastrarProcedimento = async (dados) => {
 // READ por ID
 export const buscarPorId = async (id) => {
   const [rows] = await connection.execute(
-    `SELECT * FROM procedimento WHERE idProcedimento = ?`,
+    `SELECT
+        p.*,
+        (
+          SELECT ia.valorUnit
+          FROM itematendimento ia
+          WHERE ia.fk_idProcedimento = p.idProcedimento
+          ORDER BY ia.fk_idAtendimento DESC
+          LIMIT 1
+        ) AS valorPadrao
+     FROM procedimento p
+     WHERE p.idProcedimento = ?`,
     [id],
   )
   return rows[0]
@@ -29,7 +39,17 @@ export const buscarPorId = async (id) => {
 // LISTAR TODOS
 export const listarTodos = async () => {
   const [rows] = await connection.execute(
-    `SELECT * FROM procedimento ORDER BY nome ASC`,
+    `SELECT
+        p.*,
+        (
+          SELECT ia.valorUnit
+          FROM itematendimento ia
+          WHERE ia.fk_idProcedimento = p.idProcedimento
+          ORDER BY ia.fk_idAtendimento DESC
+          LIMIT 1
+        ) AS valorPadrao
+     FROM procedimento p
+     ORDER BY p.nome ASC`,
   )
   return rows
 }
@@ -37,11 +57,20 @@ export const listarTodos = async () => {
 // BUSCA por nome ou tipo
 export const consultarProcedimento = async (busca) => {
   const [rows] = await connection.execute(
-    `SELECT * FROM procedimento
-     WHERE nome LIKE ? 
-        OR tipoProcedimento LIKE ? 
-        OR descricao LIKE ?
-     ORDER BY nome ASC`,
+    `SELECT
+        p.*,
+        (
+          SELECT ia.valorUnit
+          FROM itematendimento ia
+          WHERE ia.fk_idProcedimento = p.idProcedimento
+          ORDER BY ia.fk_idAtendimento DESC
+          LIMIT 1
+        ) AS valorPadrao
+     FROM procedimento p
+     WHERE p.nome LIKE ?
+        OR p.tipoProcedimento LIKE ?
+        OR p.descricao LIKE ?
+     ORDER BY p.nome ASC`,
     [`%${busca}%`, `%${busca}%`, `%${busca}%`],
   )
   return rows

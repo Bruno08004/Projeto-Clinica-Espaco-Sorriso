@@ -27,7 +27,7 @@ CREATE TABLE `atendimento` (
   `observacao` text,
   `data` date NOT NULL,
   `valorTotal` decimal(10,2) unsigned NOT NULL,
-  `tipoAtendimento` enum('ORTODÔNTICO','CLÍNICO') NOT NULL,
+  `tipoAtendimento` varchar(20) NOT NULL,
   `parcelas` int unsigned DEFAULT NULL,
   `fk_CPF_Paciente` varchar(11) DEFAULT NULL,
   `fk_CPF_Secretaria` varchar(11) DEFAULT NULL,

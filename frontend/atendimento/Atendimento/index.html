@@ -65,16 +65,19 @@
           <option value="">Selecione o tipo*</option>
           <option value="CLÍNICO">CLINICO</option>
           <option value="ORTODÔNTICO">ORTODONTICO</option>
+          <option value="AMBOS">AMBOS</option>
         </select>
 
         <label for="cpf-paciente">CPF do paciente*</label>
-        <input id="cpf-paciente" placeholder="CPF do paciente*">
+        <select id="cpf-paciente">
+          <option value="">Selecione o paciente*</option>
+        </select>
 
         <label for="cpf-secretaria">CPF da secretaria*</label>
         <input id="cpf-secretaria" placeholder="CPF da secretaria*">
 
         <label for="valor-total">Valor total*</label>
-        <input id="valor-total" type="number" min="0" step="0.01" placeholder="Valor total*">
+        <input id="valor-total" type="number" min="0" step="0.01" placeholder="Valor total*" readonly>
 
         <label for="parcelas">Parcelas</label>
         <input id="parcelas" type="number" min="1" placeholder="Parcelas">
@@ -128,11 +131,13 @@
 <script>
   const API_URL = 'http://localhost:3000/atendimentos';
   const PROCEDIMENTOS_URL = 'http://localhost:3000/procedimentos';
+  const PACIENTES_URL = 'http://localhost:3000/pacientes';
   const tbody = document.querySelector('table tbody');
   const formAtendimento = document.getElementById('form-atendimento');
   let idEmEdicao = null;
   let atendimentosCache = [];
   let procedimentosCache = [];
+  let pacientesCache = [];
   let itensAtendimento = [];
 
   function showModal(title, message, type = 'info', buttons = []) {
@@ -183,20 +188,40 @@
   }
 
   function atualizarValorTotal() {
-    if (!itensAtendimento.length) return;
     const total = itensAtendimento.reduce((soma, item) => soma + calcularValorItem(item), 0);
     document.getElementById('valor-total').value = total.toFixed(2);
   }
 
+  function normalizarTexto(texto) {
+    return String(texto || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase();
+  }
+
   function renderizarProcedimentosSelect() {
     const select = document.getElementById('id-procedimento');
+    const tipoAtendimento = normalizarTexto(document.getElementById('tipoAtendimento').value);
     select.innerHTML = '<option value="">Selecione o procedimento</option>';
-    procedimentosCache.forEach(procedimento => {
+
+    const procedimentosFiltrados = procedimentosCache.filter(procedimento => {
+      if (!tipoAtendimento || tipoAtendimento === 'AMBOS') return true;
+      return normalizarTexto(procedimento.tipoProcedimento) === tipoAtendimento;
+    });
+
+    procedimentosFiltrados.forEach(procedimento => {
       const option = document.createElement('option');
       option.value = procedimento.idProcedimento;
       option.textContent = `${procedimento.nome} - ${procedimento.tipoProcedimento}`;
       select.appendChild(option);
     });
+  }
+
+  function preencherValorUnitarioProcedimento() {
+    const idProcedimento = document.getElementById('id-procedimento').value;
+    const procedimento = procedimentosCache.find(item => String(item.idProcedimento) === String(idProcedimento));
+
+    document.getElementById('valor-unit').value = procedimento?.valorPadrao ? Number(procedimento.valorPadrao).toFixed(2) : '';
   }
 
   function renderizarItens() {
@@ -330,10 +355,40 @@
     }
   }
 
+  function renderizarPacientesSelect() {
+    const select = document.getElementById('cpf-paciente');
+    select.innerHTML = '<option value="">Selecione o paciente*</option>';
+
+    pacientesCache.forEach(paciente => {
+      const option = document.createElement('option');
+      option.value = paciente.CPF_Paciente;
+      option.textContent = `${paciente.nome} - ${paciente.CPF_Paciente}`;
+      select.appendChild(option);
+    });
+  }
+
+  async function carregarPacientes() {
+    try {
+      const resposta = await fetch(PACIENTES_URL);
+      const resultado = await resposta.json();
+      if (!resposta.ok) throw new Error(resultado.erro || resultado.error || 'Erro ao carregar pacientes.');
+      const mapa = new Map();
+      (Array.isArray(resultado) ? resultado : []).forEach(paciente => {
+        if (!mapa.has(paciente.CPF_Paciente)) mapa.set(paciente.CPF_Paciente, paciente);
+      });
+      pacientesCache = Array.from(mapa.values());
+      renderizarPacientesSelect();
+    } catch (erro) {
+      console.error('Erro ao carregar pacientes:', erro);
+      showAlert('Erro', erro.message || 'Erro ao carregar pacientes.', 'error');
+    }
+  }
+
   function editarAtendimento(atendimento) {
     idEmEdicao = atendimento.idAtendimento;
     document.getElementById('data').value = formatarData(atendimento.data);
     document.getElementById('tipoAtendimento').value = atendimento.tipoAtendimento || '';
+    renderizarProcedimentosSelect();
     document.getElementById('cpf-paciente').value = atendimento.fk_CPF_Paciente || '';
     document.getElementById('cpf-secretaria').value = atendimento.fk_CPF_Secretaria || '';
     document.getElementById('valor-total').value = atendimento.valorTotal || '';
@@ -469,6 +524,14 @@
 
   document.querySelectorAll('.tabs button')[0].addEventListener('click', limparFormulario);
   document.getElementById('adicionar-item').addEventListener('click', adicionarItem);
+  document.getElementById('id-procedimento').addEventListener('change', preencherValorUnitarioProcedimento);
+  document.getElementById('tipoAtendimento').addEventListener('change', () => {
+    itensAtendimento = [];
+    limparCamposItem();
+    renderizarItens();
+    atualizarValorTotal();
+    renderizarProcedimentosSelect();
+  });
 
   document.getElementById('busca-btn').addEventListener('click', () => {
     const termo = document.getElementById('busca-input').value.trim().toLowerCase();
@@ -476,14 +539,30 @@
       showAlert('Campo vazio', 'Digite algo para buscar.', 'warning');
       return;
     }
-    const encontrados = atendimentosCache.filter(atendimento =>
-      String(atendimento.idAtendimento || '').includes(termo) ||
-      formatarData(atendimento.data).includes(termo) ||
-      (atendimento.tipoAtendimento || '').toLowerCase().includes(termo) ||
-      (atendimento.fk_CPF_Paciente || '').includes(termo) ||
-      (atendimento.paciente_nome || '').toLowerCase().includes(termo) ||
-      (atendimento.itens || []).some(item => (item.nomeProcedimento || item.procedimento_nome || '').toLowerCase().includes(termo))
-    );
+
+    let encontrados = [];
+    const termoNumerico = /^\d+$/.test(termo);
+
+    if (termoNumerico) {
+      encontrados = atendimentosCache.filter(
+        atendimento => String(atendimento.idAtendimento || '') === termo
+      );
+
+      if (!encontrados.length) {
+        encontrados = atendimentosCache.filter(atendimento =>
+          (atendimento.fk_CPF_Paciente || '').includes(termo) ||
+          (atendimento.itens || []).some(item => String(item.fk_idProcedimento || item.idProcedimento || '') === termo)
+        );
+      }
+    } else {
+      encontrados = atendimentosCache.filter(atendimento =>
+        formatarData(atendimento.data).includes(termo) ||
+        (atendimento.tipoAtendimento || '').toLowerCase().includes(termo) ||
+        (atendimento.paciente_nome || '').toLowerCase().includes(termo) ||
+        (atendimento.itens || []).some(item => (item.nomeProcedimento || item.procedimento_nome || '').toLowerCase().includes(termo))
+      );
+    }
+
     renderizarAtendimentos(encontrados);
   });
 
@@ -511,6 +590,7 @@
   }
 
   renderizarItens();
+  carregarPacientes();
   carregarProcedimentos();
   carregarAtendimentos();
 </script>

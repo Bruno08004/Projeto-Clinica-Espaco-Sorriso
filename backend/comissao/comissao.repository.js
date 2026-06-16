@@ -18,6 +18,21 @@ const valorComissaoSql = `
     END
 `;
 
+const valorComissaoPersistidoSql = `
+    COALESCE(
+        ia.comissaoDentista,
+        ${valorComissaoSql}
+    )
+`;
+
+const percentualComissaoPersistidoSql = `
+    CASE
+        WHEN ${valorBaseSql} = 0 THEN 0
+        WHEN ia.comissaoDentista IS NOT NULL THEN ROUND((ia.comissaoDentista / ${valorBaseSql}) * 100, 2)
+        ELSE ${percentualComissaoSql}
+    END
+`;
+
 function montarFiltros(filtros = {}) {
     const where = [];
     const params = [];
@@ -81,8 +96,8 @@ const comissaoRepository = {
                 ia.valorUnit,
                 COALESCE(ia.descontoItem, 0) AS descontoItem,
                 ROUND(${valorBaseSql}, 2) AS valorBase,
-                ${percentualComissaoSql} AS percentualComissao,
-                ROUND(${valorComissaoSql}, 2) AS valorComissao,
+                ${percentualComissaoPersistidoSql} AS percentualComissao,
+                ROUND(${valorComissaoPersistidoSql}, 2) AS valorComissao,
                 ia.comissaoDentista
             FROM itematendimento ia
             INNER JOIN atendimento a ON ia.fk_idAtendimento = a.idAtendimento
@@ -190,7 +205,7 @@ const comissaoRepository = {
                 d.nome,
                 COUNT(DISTINCT a.idAtendimento) AS totalAtendimentos,
                 COUNT(*) AS totalProcedimentos,
-                ROUND(SUM(${valorComissaoSql}), 2) AS totalComissao
+                ROUND(SUM(${valorComissaoPersistidoSql}), 2) AS totalComissao
             FROM itematendimento ia
             INNER JOIN atendimento a ON ia.fk_idAtendimento = a.idAtendimento
             INNER JOIN dentista d ON ia.CPF_Dentista = d.CPF_Dentista
