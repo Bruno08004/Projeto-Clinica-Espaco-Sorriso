@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Pagamentos</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../global.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <img src="../../espaco_sorriso_transparente.png" alt="Espaço Sorriso">
+  </div>
+
+  <h1>Espaço Sorriso - Sistema de Gestão</h1>
+
+  <nav>
+    <a href="../../Tela/index.html">Início</a>
+    <a href="#">Relatórios</a>
+    <a href="#">Configurações</a>
+    <a href="javascript:sair()">Sair</a>
+  </nav>
+
+  <div class="profile">💳</div>
+</header>
+
+<main class="container">
+  <div class="title">
+    <h2>Gerenciamento de Pagamentos</h2>
+    <p>Registre e acompanhe recebimentos vinculados aos atendimentos.</p>
+  </div>
+
+  <div class="content">
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Atendimento</th>
+            <th>Forma</th>
+            <th>Valor Bruto</th>
+            <th>Taxa</th>
+            <th>Valor Líquido</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="form-box">
+      <div class="tabs">
+        <button class="active">Cadastrar Pagamento</button>
+      </div>
+
+      <form id="form-pagamento">
+        <label for="id-atendimento">Atendimento*</label>
+        <select id="id-atendimento" required>
+          <option value="">Selecione um atendimento</option>
+        </select>
+
+        <label for="data-recebimento">Data de Recebimento*</label>
+        <input id="data-recebimento" type="date" required>
+
+        <label for="valor-bruto">Valor Bruto*</label>
+        <input id="valor-bruto" type="number" step="0.01" min="0" required>
+
+        <label for="taxa-cartao">Taxa Cartão</label>
+        <input id="taxa-cartao" type="number" step="0.01" min="0" value="0">
+
+        <label for="valor-liquido">Valor Líquido</label>
+        <input id="valor-liquido" type="number" step="0.01" min="0" readonly>
+
+        <label for="forma-pagamento">Forma de Pagamento*</label>
+        <select id="forma-pagamento" required>
+          <option value="">Selecione</option>
+          <option value="CRÉDITO">CRÉDITO</option>
+          <option value="DÉBITO">DÉBITO</option>
+          <option value="PIX">PIX</option>
+          <option value="DINHEIRO">DINHEIRO</option>
+        </select>
+
+        <button type="submit" class="save">Salvar Pagamento</button>
+        <button type="button" class="cancel" id="limpar-btn">Limpar</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <button onclick="sair()">SAIR</button>
+</footer>
+
+<div id="modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-message" id="modal-message"></div>
+    <div class="modal-buttons" id="modal-buttons"></div>
+  </div>
+</div>
+
+<script>
+  const API_URL = 'http://localhost:3000'
+  const tabelaCorpo = document.querySelector('table tbody')
+  const formPagamento = document.getElementById('form-pagamento')
+  const selectAtendimento = document.getElementById('id-atendimento')
+  const dataRecebimento = document.getElementById('data-recebimento')
+  const valorBruto = document.getElementById('valor-bruto')
+  const taxaCartao = document.getElementById('taxa-cartao')
+  const valorLiquido = document.getElementById('valor-liquido')
+  const formaPagamento = document.getElementById('forma-pagamento')
+  const limparBtn = document.getElementById('limpar-btn')
+  let pagamentoEmEdicao = null
+
+  function showModal(title, message, type = 'info', buttons = []) {
+    const modal = document.getElementById('modal')
+    const iconEl = document.getElementById('modal-icon')
+    const titleEl = document.getElementById('modal-title')
+    const messageEl = document.getElementById('modal-message')
+    const buttonsEl = document.getElementById('modal-buttons')
+
+    const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ', confirm: '?' }
+    modal.className = 'modal-overlay active modal-' + type
+    iconEl.textContent = icons[type] || icons.info
+    titleEl.textContent = title
+    messageEl.textContent = message
+    buttonsEl.innerHTML = ''
+
+    buttons.forEach(btn => {
+      const button = document.createElement('button')
+      button.className = 'modal-btn ' + (btn.className || 'modal-btn-secondary')
+      button.textContent = btn.text
+      button.onclick = () => {
+        btn.action()
+        modal.classList.remove('active')
+      }
+      buttonsEl.appendChild(button)
+    })
+
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active')
+      }
+    }
+  }
+
+  function showAlert(title, message, type = 'info') {
+    showModal(title, message, type, [
+      { text: 'OK', className: 'modal-btn-primary', action: () => {} }
+    ])
+  }
+
+  function showConfirm(title, message, onConfirm) {
+    showModal(title, message, 'confirm', [
+      { text: 'Cancelar', className: 'modal-btn-secondary', action: () => {} },
+      { text: 'Confirmar', className: 'modal-btn-danger', action: onConfirm }
+    ])
+  }
+
+  function calcularValorLiquido() {
+    const bruto = parseFloat(valorBruto.value) || 0
+    const taxa = parseFloat(taxaCartao.value) || 0
+    const liquido = bruto - taxa
+    valorLiquido.value = liquido >= 0 ? liquido.toFixed(2) : '0.00'
+  }
+
+  async function carregarAtendimentos() {
+    try {
+      const resposta = await fetch(`${API_URL}/atendimentos`)
+      const atendimentos = await resposta.json()
+      const mapa = new Map()
+
+      atendimentos.forEach(item => {
+        if (!mapa.has(item.idAtendimento)) {
+          mapa.set(item.idAtendimento, item)
+        }
+      })
+
+      selectAtendimento.innerHTML = '<option value="">Selecione um atendimento</option>'
+
+      mapa.forEach(item => {
+        const option = document.createElement('option')
+        option.value = item.idAtendimento
+        option.textContent = `#${item.idAtendimento} - ${item.paciente_nome || item.fk_CPF_Paciente || 'Paciente não informado'}`
+        selectAtendimento.appendChild(option)
+      })
+    } catch (erro) {
+      console.error('Erro ao carregar atendimentos:', erro)
+      showAlert('Erro', 'Não foi possível carregar a lista de atendimentos.', 'error')
+    }
+  }
+
+  async function carregarPagamentos() {
+    try {
+      const resposta = await fetch(`${API_URL}/pagamentos`)
+      const pagamentos = await resposta.json()
+      tabelaCorpo.innerHTML = ''
+
+      pagamentos.forEach(pag => {
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          <td>${pag.idPagamento}</td>
+          <td>${pag.dataRecebimento}</td>
+          <td>#${pag.fk_dAtendimento} ${pag.paciente_nome ? `- ${pag.paciente_nome}` : ''}</td>
+          <td>${pag.formaPagamento}</td>
+          <td>R$ ${Number(pag.valorBruto).toFixed(2)}</td>
+          <td>R$ ${Number(pag.taxaCartao).toFixed(2)}</td>
+          <td>R$ ${Number(pag.valorLiquido).toFixed(2)}</td>
+          <td>
+            <button class="edit" data-id="${pag.idPagamento}">Editar</button>
+            <button class="delete" data-id="${pag.idPagamento}">Excluir</button>
+          </td>
+        `
+        tabelaCorpo.appendChild(tr)
+
+        tr.querySelector('.edit').addEventListener('click', () => editarPagamento(pag))
+        tr.querySelector('.delete').addEventListener('click', () => excluirPagamento(pag.idPagamento))
+      })
+    } catch (erro) {
+      console.error('Erro ao carregar pagamentos:', erro)
+      showAlert('Erro', 'Não foi possível carregar os pagamentos.', 'error')
+    }
+  }
+
+  function preencherFormulario(pagamento) {
+    pagamentoEmEdicao = pagamento.idPagamento
+    selectAtendimento.value = pagamento.fk_dAtendimento
+    dataRecebimento.value = pagamento.dataRecebimento
+    valorBruto.value = pagamento.valorBruto
+    taxaCartao.value = pagamento.taxaCartao
+    valorLiquido.value = Number(pagamento.valorLiquido).toFixed(2)
+    formaPagamento.value = pagamento.formaPagamento
+    document.querySelector('.save').textContent = 'Atualizar Pagamento'
+  }
+
+  function limparFormulario() {
+    pagamentoEmEdicao = null
+    formPagamento.reset()
+    valorLiquido.value = '0.00'
+    document.querySelector('.save').textContent = 'Salvar Pagamento'
+  }
+
+  async function editarPagamento(pagamento) {
+    try {
+      preencherFormulario(pagamento)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (erro) {
+      console.error('Erro ao preparar edição:', erro)
+      showAlert('Erro', 'Não foi possível preparar a edição.', 'error')
+    }
+  }
+
+  async function excluirPagamento(idPagamento) {
+    showConfirm('Excluir Pagamento', 'Tem certeza que deseja excluir este pagamento?', async () => {
+      try {
+        await fetch(`${API_URL}/pagamentos/${idPagamento}`, { method: 'DELETE' })
+        await carregarPagamentos()
+        showAlert('Sucesso', 'Pagamento excluído com sucesso.', 'success')
+      } catch (erro) {
+        console.error('Erro ao excluir pagamento:', erro)
+        showAlert('Erro', 'Não foi possível excluir o pagamento.', 'error')
+      }
+    })
+  }
+
+  formPagamento.addEventListener('submit', async (e) => {
+    e.preventDefault()
+
+    const body = {
+      fk_dAtendimento: selectAtendimento.value,
+      dataRecebimento: dataRecebimento.value,
+      valorBruto: valorBruto.value,
+      taxaCartao: taxaCartao.value,
+      valorLiquido: valorLiquido.value,
+      formaPagamento: formaPagamento.value
+    }
+
+    try {
+      const method = pagamentoEmEdicao ? 'PUT' : 'POST'
+      const url = pagamentoEmEdicao ? `${API_URL}/pagamentos/${pagamentoEmEdicao}` : `${API_URL}/pagamentos`
+      const resposta = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+
+      const resultado = await resposta.json()
+      if (!resposta.ok) {
+        throw new Error(resultado.error || 'Erro ao salvar o pagamento.')
+      }
+
+      limparFormulario()
+      await carregarPagamentos()
+      showAlert('Sucesso', resultado.mensagem || 'Pagamento salvo com sucesso.', 'success')
+    } catch (erro) {
+      console.error('Erro ao enviar pagamento:', erro)
+      showAlert('Erro', erro.message || 'Não foi possível salvar o pagamento.', 'error')
+    }
+  })
+
+  limparBtn.addEventListener('click', limparFormulario)
+  valorBruto.addEventListener('input', calcularValorLiquido)
+  taxaCartao.addEventListener('input', calcularValorLiquido)
+
+  function sair() {
+    location.href = '../../Tela/index.html'
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    await carregarAtendimentos()
+    await carregarPagamentos()
+    calcularValorLiquido()
+  })
+</script>
+
+</body>
+</html>

@@ -10,7 +10,7 @@
 
 <header class="topbar">
   <div class="logo">
-    <img src="../../assests/logo.png" alt="Espaço Sorriso">
+    <img src="../../espaco_sorriso_transparente.png" alt="Espaço Sorriso">
   </div>
 
   <h1>Espaço Sorriso - Sistema de Gestão</h1>
@@ -240,13 +240,23 @@
   // 1. Função que BUSCA e DESENHA a tabela (GET)
   async function carregarDentistas() {
     try {
-      const resposta = await fetch('http://localhost:3001/dentistas');
-      const dentistas = await resposta.json();
+      const resposta = await fetch('http://localhost:3000/dentistas');
 
+      if (!resposta.ok) {
+        const erroRetorno = await resposta.json().catch(() => null);
+        const mensagem = erroRetorno?.erro || erroRetorno?.mensagem || 'O serviço de dentistas está temporariamente indisponível.';
+        throw new Error(mensagem);
+      }
+
+      const dentistas = await resposta.json();
       renderizarDentistas(dentistas);
     } catch (erro) {
       console.error('Erro ao carregar tabela:', erro);
-      showAlert('Erro', 'Erro ao carregar dentistas', 'error');
+      showAlert(
+        'Serviço indisponível',
+        'O serviço de dentistas está temporariamente indisponível. Tente novamente mais tarde.',
+        'error'
+      );
     }
   }
 
@@ -280,7 +290,7 @@
       'Tem certeza que deseja excluir este dentista? Esta ação não pode ser desfeita.',
       async () => {
         try {
-          const resposta = await fetch(`http://localhost:3001/dentistas/${cpf}`, {
+          const resposta = await fetch(`http://localhost:3000/dentistas/${cpf}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -297,7 +307,11 @@
           }
         } catch (erro) {
           console.error(erro);
-          showAlert('Erro', 'Erro ao excluir dentista', 'error');
+          showAlert(
+            'Serviço indisponível',
+            'O serviço de dentistas está temporariamente indisponível. Tente novamente mais tarde.',
+            'error'
+          );
         }
       }
     );
@@ -339,12 +353,12 @@
     dados.especialidade = dados.especialidade.toUpperCase();
 
     try {
-      let url = 'http://localhost:3001/dentistas';
+      let url = 'http://localhost:3000/dentistas';
       let metodo = 'POST';
 
       // Se está editando, usa PUT
       if (cpfEmEdicao) {
-        url = `http://localhost:3001/dentistas/${cpfEmEdicao}`;
+        url = `http://localhost:3000/dentistas/${cpfEmEdicao}`;
         metodo = 'PUT';
       }
 
@@ -375,7 +389,11 @@
       }
     } catch (erro) {
       console.error(erro);
-      showAlert('Erro', 'O backend não respondeu.', 'error');
+      showAlert(
+        'Serviço indisponível',
+        'O serviço de dentistas está temporariamente indisponível. Tente novamente mais tarde.',
+        'error'
+      );
     }
   });
 
@@ -401,7 +419,14 @@
     }
 
     try {
-      const resposta = await fetch('http://localhost:3001/dentistas');
+      const resposta = await fetch('http://localhost:3000/dentistas');
+
+      if (!resposta.ok) {
+        const erroRetorno = await resposta.json().catch(() => null);
+        const mensagem = erroRetorno?.erro || erroRetorno?.mensagem || 'O serviço de dentistas está temporariamente indisponível.';
+        throw new Error(mensagem);
+      }
+
       const dentistas = await resposta.json();
 
       // Filtra os dentistas baseado na busca
@@ -415,7 +440,11 @@
       renderizarDentistas(dentistasEncontrados);
     } catch (erro) {
       console.error('Erro ao buscar:', erro);
-      showAlert('Erro', 'Erro ao buscar dentistas', 'error');
+      showAlert(
+        'Serviço indisponível',
+        'O serviço de dentistas está temporariamente indisponível. Tente novamente mais tarde.',
+        'error'
+      );
     }
   });
 

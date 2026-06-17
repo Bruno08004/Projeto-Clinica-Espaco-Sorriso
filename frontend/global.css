@@ -1,29 +1,51 @@
-/* Navbar global */
+/* NAVBAR */
 .topbar {
   height: 70px;
   min-height: 70px;
-  padding: 0 20px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   overflow: visible;
 }
 
+/* LOGO */
 .logo {
-  width: 170px;
-  height: 70px;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  justify-content: flex-start;
+  height: 100%;
+  min-width: 64px;
   overflow: visible;
 }
 
 .logo img {
-  height: 170px;
-  max-height: none;
+  height: 150px; /* quase toda a navbar */
   width: auto;
-  object-fit: contain;
   display: block;
+  object-fit: contain;
+}
+
+/* TABLET */
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 16px;
+  }
+
+  .logo img {
+    height: 56px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+  .topbar {
+    padding: 0 12px;
+  }
+
+  .logo img {
+    height: 48px;
+  }
 }
 
 .topbar h1,
@@ -33,7 +55,7 @@
   align-self: center;
 }
 
-/* BOTÕES UNIFORMES */
+/* BOTÕES */
 button,
 .btn {
   border: none;
@@ -117,4 +139,3 @@ input {
   border-radius: 16px;
   border: 1px solid #d9e6e6;
 }
-
