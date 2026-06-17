@@ -98,8 +98,9 @@ function navigate(page) {
       break;
 
     case "pagamentos":
-      showAlert('Em Desenvolvimento', '🚧 Gestão de Pagamentos em desenvolvimento', 'warning');
-      cards.forEach(card => card.style.opacity = '1');
+      setTimeout(() => {
+        window.location.href = "../pagamento/Pagamento/index.html";
+      }, 200);
       break;
 
     case "comissao":

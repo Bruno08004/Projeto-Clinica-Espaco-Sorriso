@@ -7,6 +7,8 @@ import pacienteRoutes from "./backend/paciente/paciente.routes.js"
 import comissaoRoutes from "./backend/comissao/comissao.routes.js"
 import procedimentoRoutes from "./backend/procedimento/procedimento.routes.js"
 import atendimentoRoutes from "./backend/atendimento/atendimento.routes.js" // Importação adicionada
+import dentistaRoutes from "./backend/dentista/dentista.routes.js"
+import pagamentoRoutes from "./backend/pagamento/pagamento.routes.js"
 
 const app = express()
 
@@ -24,13 +26,7 @@ app.use("/pacientes", pacienteRoutes)
 app.use("/comissoes", comissaoRoutes)
 app.use("/procedimentos", procedimentoRoutes)
 app.use("/atendimentos", atendimentoRoutes) // Rota adicionada seguindo o padrão do projeto
-
-// Rotas de dentistas (endpoint base)
-app.get("/dentistas", async (req, res) => {
-  res.json({
-    mensagem: "Acesse o servidor de dentistas em http://localhost:3001",
-    info: "Rotas disponíveis: POST/GET/PUT/DELETE /dentistas",
-  })
-})
+app.use("/dentistas", dentistaRoutes)
+app.use("/pagamentos", pagamentoRoutes)
 
 export default app
