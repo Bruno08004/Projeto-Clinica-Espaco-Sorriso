@@ -67,7 +67,9 @@
           <option value="">Selecione o procedimento*</option>
         </select>
         <label for="cpf-dentista">CPF do dentista*</label>
-        <input id="cpf-dentista" placeholder="CPF do dentista*">
+        <select id="cpf-dentista">
+          <option value="">Selecione o dentista*</option>
+        </select>
         <label for="qtd">Quantidade*</label>
         <input id="qtd" type="number" min="1" placeholder="Quantidade*">
         <input id="valor-unit" type="number" min="0" step="0.01" placeholder="Valor unitário*">
@@ -95,12 +97,14 @@
 <script>
   const API_URL = 'http://localhost:3000/comissoes';
   const ATENDIMENTOS_URL = 'http://localhost:3000/atendimentos';
+  const DENTISTAS_URL = 'http://localhost:3000/dentistas';
   const tbody = document.querySelector('table tbody');
   const formComissao = document.getElementById('form-comissao');
   let chaveEmEdicao = null;
   let comissoesCache = [];
   let atendimentosCache = [];
   let procedimentosDoAtendimento = [];
+  let dentistasCache = [];
 
   const rotulosCampos = {
     'id-atendimento': 'Atendimento*',
@@ -182,6 +186,35 @@
     });
 
     select.appendChild(grupoVinculados);
+  }
+
+  function renderizarDentistasSelect(valorSelecionado = '') {
+    const select = document.getElementById('cpf-dentista');
+    select.innerHTML = '<option value="">Selecione o dentista*</option>';
+
+    dentistasCache.forEach(dentista => {
+      const option = document.createElement('option');
+      option.value = dentista.CPF_Dentista;
+      option.textContent = `${dentista.nome} - ${dentista.CPF_Dentista}`;
+      select.appendChild(option);
+    });
+
+    if (valorSelecionado) {
+      select.value = valorSelecionado;
+    }
+  }
+
+  async function carregarDentistas() {
+    try {
+      const resposta = await fetch(DENTISTAS_URL);
+      const resultado = await resposta.json();
+      if (!resposta.ok) throw new Error(resultado.erro || resultado.error || 'Erro ao carregar dentistas.');
+      dentistasCache = Array.isArray(resultado) ? resultado : [];
+      renderizarDentistasSelect();
+    } catch (erro) {
+      console.error('Erro ao carregar dentistas:', erro);
+      showAlert('Erro', erro.message || 'Erro ao carregar dentistas.', 'error');
+    }
   }
 
   async function carregarAtendimentos() {
@@ -325,7 +358,8 @@
     document.getElementById('id-atendimento').value = comissao.fk_idAtendimento || '';
     await carregarProcedimentosDoAtendimento(comissao.fk_idAtendimento);
     document.getElementById('id-procedimento').value = comissao.fk_idProcedimento || '';
-    document.getElementById('cpf-dentista').value = comissao.CPF_Dentista || '';
+    await carregarDentistas();
+    renderizarDentistasSelect(comissao.CPF_Dentista || '');
     document.getElementById('qtd').value = comissao.qtd || '';
     document.getElementById('valor-unit').value = comissao.valorUnit || '';
     document.getElementById('desconto-item').value = comissao.descontoItem || '';
@@ -481,6 +515,7 @@
   }
 
   carregarAtendimentos();
+  carregarDentistas();
   renderizarProcedimentosSelect();
   carregarComissoes();
 </script>
