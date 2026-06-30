@@ -9,6 +9,7 @@ import procedimentoRoutes from "./backend/procedimento/procedimento.routes.js"
 import atendimentoRoutes from "./backend/atendimento/atendimento.routes.js" // Importação adicionada
 import dentistaRoutes from "./backend/dentista/dentista.routes.js"
 import pagamentoRoutes from "./backend/pagamento/pagamento.routes.js"
+import secretariaRoutes from "./backend/secretaria/secretaria.routes.js"
 
 const app = express()
 
@@ -27,6 +28,7 @@ app.use("/comissoes", comissaoRoutes)
 app.use("/procedimentos", procedimentoRoutes)
 app.use("/atendimentos", atendimentoRoutes) // Rota adicionada seguindo o padrão do projeto
 app.use("/dentistas", dentistaRoutes)
+app.use("/secretarias", secretariaRoutes)
 app.use("/pagamentos", pagamentoRoutes)
 
 export default app

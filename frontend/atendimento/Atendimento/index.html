@@ -74,7 +74,9 @@
         </select>
 
         <label for="cpf-secretaria">CPF da secretaria*</label>
-        <input id="cpf-secretaria" placeholder="CPF da secretaria*">
+        <select id="cpf-secretaria">
+          <option value="">Selecione a secretaria*</option>
+        </select>
 
         <label for="valor-total">Valor total*</label>
         <input id="valor-total" type="number" min="0" step="0.01" placeholder="Valor total*" readonly>
@@ -94,7 +96,9 @@
           </select>
 
           <label for="cpf-dentista">CPF do dentista</label>
-          <input id="cpf-dentista" placeholder="CPF do dentista">
+          <select id="cpf-dentista">
+            <option value="">Selecione o dentista</option>
+          </select>
 
           <label for="qtd">Quantidade</label>
           <input id="qtd" type="number" min="1" placeholder="Quantidade">
@@ -132,12 +136,16 @@
   const API_URL = 'http://localhost:3000/atendimentos';
   const PROCEDIMENTOS_URL = 'http://localhost:3000/procedimentos';
   const PACIENTES_URL = 'http://localhost:3000/pacientes';
+  const DENTISTAS_URL = 'http://localhost:3000/dentistas';
+  const SECRETARIAS_URL = 'http://localhost:3000/secretarias';
   const tbody = document.querySelector('table tbody');
   const formAtendimento = document.getElementById('form-atendimento');
   let idEmEdicao = null;
   let atendimentosCache = [];
   let procedimentosCache = [];
   let pacientesCache = [];
+  let dentistasCache = [];
+  let secretariasCache = [];
   let itensAtendimento = [];
 
   function showModal(title, message, type = 'info', buttons = []) {
@@ -367,6 +375,64 @@
     });
   }
 
+  function renderizarSecretariasSelect(valorSelecionado = '') {
+    const select = document.getElementById('cpf-secretaria');
+    select.innerHTML = '<option value="">Selecione a secretaria*</option>';
+
+    secretariasCache.forEach(secretaria => {
+      const option = document.createElement('option');
+      option.value = secretaria.CPF_Secretaria;
+      option.textContent = `${secretaria.nome} - ${secretaria.CPF_Secretaria}`;
+      select.appendChild(option);
+    });
+
+    if (valorSelecionado) {
+      select.value = valorSelecionado;
+    }
+  }
+
+  function renderizarDentistasSelect(valorSelecionado = '') {
+    const select = document.getElementById('cpf-dentista');
+    select.innerHTML = '<option value="">Selecione o dentista</option>';
+
+    dentistasCache.forEach(dentista => {
+      const option = document.createElement('option');
+      option.value = dentista.CPF_Dentista;
+      option.textContent = `${dentista.nome} - ${dentista.CPF_Dentista}`;
+      select.appendChild(option);
+    });
+
+    if (valorSelecionado) {
+      select.value = valorSelecionado;
+    }
+  }
+
+  async function carregarSecretarias() {
+    try {
+      const resposta = await fetch(SECRETARIAS_URL);
+      const resultado = await resposta.json();
+      if (!resposta.ok) throw new Error(resultado.erro || resultado.error || 'Erro ao carregar secretarias.');
+      secretariasCache = Array.isArray(resultado) ? resultado : [];
+      renderizarSecretariasSelect();
+    } catch (erro) {
+      console.error('Erro ao carregar secretarias:', erro);
+      showAlert('Erro', erro.message || 'Erro ao carregar secretarias.', 'error');
+    }
+  }
+
+  async function carregarDentistas() {
+    try {
+      const resposta = await fetch(DENTISTAS_URL);
+      const resultado = await resposta.json();
+      if (!resposta.ok) throw new Error(resultado.erro || resultado.error || 'Erro ao carregar dentistas.');
+      dentistasCache = Array.isArray(resultado) ? resultado : [];
+      renderizarDentistasSelect();
+    } catch (erro) {
+      console.error('Erro ao carregar dentistas:', erro);
+      showAlert('Erro', erro.message || 'Erro ao carregar dentistas.', 'error');
+    }
+  }
+
   async function carregarPacientes() {
     try {
       const resposta = await fetch(PACIENTES_URL);
@@ -384,13 +450,16 @@
     }
   }
 
-  function editarAtendimento(atendimento) {
+  async function editarAtendimento(atendimento) {
     idEmEdicao = atendimento.idAtendimento;
     document.getElementById('data').value = formatarData(atendimento.data);
     document.getElementById('tipoAtendimento').value = atendimento.tipoAtendimento || '';
     renderizarProcedimentosSelect();
     document.getElementById('cpf-paciente').value = atendimento.fk_CPF_Paciente || '';
-    document.getElementById('cpf-secretaria').value = atendimento.fk_CPF_Secretaria || '';
+    await carregarSecretarias();
+    renderizarSecretariasSelect(atendimento.fk_CPF_Secretaria || '');
+    await carregarDentistas();
+    renderizarDentistasSelect('');
     document.getElementById('valor-total').value = atendimento.valorTotal || '';
     document.getElementById('parcelas').value = atendimento.parcelas || '';
     document.getElementById('observacao').value = atendimento.observacao || '';
@@ -591,6 +660,8 @@
 
   renderizarItens();
   carregarPacientes();
+  carregarSecretarias();
+  carregarDentistas();
   carregarProcedimentos();
   carregarAtendimentos();
 </script>
